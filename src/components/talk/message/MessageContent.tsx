@@ -82,7 +82,7 @@ function convertLineBreak(message: string | null | undefined) {
   if (message === null || message === undefined) return;
   const messageValue = JSON.parse(message) as { text: string; format: string };
   if (messageValue.format === "text") {
-    return messageValue.text.split("\n").map((line, index) => (
+    return messageValue.text.split("\n").map((line) => (
       <span>
         {line}
         <br />

@@ -6,8 +6,6 @@ import {
 } from "../../utils/room/roomState.ts";
 import { createEffect, createSignal, For, Show } from "solid-js";
 import { groupChannelState } from "../sidebar/SideBar.tsx";
-import { PopUpFrame } from "../utils/popUpFrame.tsx";
-import { uuidv7 } from "npm:uuidv7";
 // 新しく作成した外部ステートをインポート
 import {
   bannedUsersState,
@@ -41,7 +39,7 @@ import {
   updatedGroupNameState,
 } from "../../utils/room/settingRoomState.ts";
 import { GroupSetting } from "./Group/Group.tsx";
-import { FriendSetting } from "./Friends/Setting.tsx";
+import { FriendSetting } from "./Friends/Friend.tsx";
 
 export function SettingRoom() {
   const [showGroupPopUp, setShowGroupPopUp] = useAtom(openConfig);

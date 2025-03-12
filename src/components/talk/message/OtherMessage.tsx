@@ -1,4 +1,4 @@
-import { createEffect, createSignal } from "solid-js";
+import { createEffect, createSignal, Show, For } from "solid-js";
 import { useAtom } from "solid-jotai";
 import { DEFAULT_ICON } from "../../utils/defaultIcon.ts";
 import { iconsState, nickNamesState } from "../../../utils/state.ts";
@@ -16,21 +16,12 @@ import {
   setReplyToMessage,
   toggleMention,
 } from "../../../utils/message/mentionReply.ts";
+import { ReplyMessagePreview } from "./ReplyMessagePreview.tsx";
+import { fetchEntityInfo, fetchMultipleEntityInfo } from "../../../utils/chache/Icon.ts";
+import MentionDisplay from "./MentionDisplay.tsx";
 
-// ユーザー情報の取得状態を追跡するグローバルMap
-const fetchingUsers = new Map<
-  string,
-  Promise<{ icon: string; nickName: string }>
->();
-
-const ChatOtherMessage = ({
-  name,
-  time,
-  content,
-  isPrimary,
-  messageid,
-  isFetch,
-}: {
+// props型定義に reply と mention を追加
+export interface ChatOtherMessageProps {
   name: string;
   time: string | number | Date;
   content: {
@@ -40,18 +31,27 @@ const ChatOtherMessage = ({
     type: string;
     timestamp: string | number | Date;
     original?: string;
+    reply?: {
+      id: string;
+    };
+    mention?: string[];
   };
   messageid: string;
   isPrimary: boolean;
-  isFetch: true | undefined;
-}) => {
-  const isPrimaryClass = isPrimary
+  isFetch?: boolean;
+}
+
+// インターフェースを使用するようにコンポーネント定義を修正
+const ChatOtherMessage = (props: ChatOtherMessageProps) => {
+  const isPrimaryClass = props.isPrimary
     ? "c-talk-chat other primary"
     : "c-talk-chat other subsequent";
   const [icon, setIcon] = createSignal(DEFAULT_ICON);
   const [nickName, setNickName] = createSignal("");
   const [icons, setIcons] = useAtom(iconsState);
   const [nickNames, setNickNames] = useAtom(nickNamesState);
+  const [mentionInfos, setMentionInfos] = createSignal(new Map());
+  const [showMentionList, setShowMentionList] = createSignal(false);
 
   // 右クリックメニュー用の状態
   const [showContextMenu, setShowContextMenu] = createSignal(false);
@@ -70,7 +70,7 @@ const ChatOtherMessage = ({
 
   // メッセージをコピー
   const copyMessage = async () => {
-    const success = await copyMessageContent(content);
+    const success = await copyMessageContent(props.content);
     if (success) {
       alert("メッセージをクリップボードにコピーしました");
     } else {
@@ -80,7 +80,12 @@ const ChatOtherMessage = ({
 
   // ユーザーを報告
   const reportUser = () => {
-    alert(`${name} を報告する機能は開発中です`);
+    alert(`${props.name} を報告する機能は開発中です`);
+  };
+
+  // メンションリストの表示切り替え
+  const toggleMentionList = () => {
+    setShowMentionList(!showMentionList());
   };
 
   // メニュー項目の定義
@@ -89,14 +94,14 @@ const ChatOtherMessage = ({
     {
       label: "リプライ",
       onClick: () => {
-        setReplyToMessage(messageid, content.type as any, content.content);
+        setReplyToMessage(props.messageid, props.content.type as any, props.content.content);
         setShowContextMenu(false);
       },
     },
     {
       label: "メンション",
       onClick: () => {
-        toggleMention(name);
+        toggleMention(props.name);
         setShowContextMenu(false);
       },
     },
@@ -111,11 +116,11 @@ const ChatOtherMessage = ({
   ];
 
   createEffect(async () => {
-    if (!isFetch) return;
+    if (!props.isFetch) return;
 
     // ローカルステートから情報を取得
-    const iconData = icons().find((value) => value.key === name);
-    const nickNameData = nickNames().find((value) => value.key === name);
+    const iconData = icons().find((value) => value.key === props.name);
+    const nickNameData = nickNames().find((value) => value.key === props.name);
 
     // 既にアイコンとニックネームが取得済みの場合はそれを使用
     if (iconData) {
@@ -130,58 +135,45 @@ const ChatOtherMessage = ({
       return;
     }
 
-    // まだ取得処理中でないユーザーの場合、新しく取得処理を開始
-    if (!fetchingUsers.has(name)) {
-      const fetchUserInfo = async () => {
-        const domain = name.split("@")[1];
-        const [iconResponse, nickNameResponse] = await Promise.all([
-          fetch(`https://${domain}/_takos/v1/user/icon/${name}`).then((res) =>
-            res.json()
-          ),
-          fetch(`https://${domain}/_takos/v1/user/nickName/${name}`).then((
-            res,
-          ) => res.json()),
-        ]);
-
-        const iconBase64 = "data:image/png;base64," + iconResponse.icon;
-        const nickNameValue = nickNameResponse.nickName;
-
-        // グローバルstateに保存
-        if (!iconData) {
-          setIcons((
-            prev,
-          ) => [...prev, { key: name, icon: iconBase64, type: "friend" }]);
-        }
-        if (!nickNameData) {
-          setNickNames((
-            prev,
-          ) => [...prev, {
-            key: name,
-            nickName: nickNameValue,
-            type: "friend",
-          }]);
-        }
-
-        return { icon: iconBase64, nickName: nickNameValue };
-      };
-
-      fetchingUsers.set(name, fetchUserInfo());
-    }
-
     try {
-      const result = await fetchingUsers.get(name);
-      if (!result) return;
-      if (!iconData) setIcon(result.icon);
-      if (!nickNameData) setNickName(result.nickName);
+      const domain = props.name.split("@")[1];
+      // 共有キャッシュから情報を取得
+      const result = await fetchEntityInfo(props.name, domain, "friend");
+      
+      // アイコン情報を設定
+      if (!iconData && result.icon) {
+        setIcon(result.icon);
+        // グローバルステートにも保存
+        setIcons(prev => [...prev, { key: props.name, icon: result.icon, type: "friend" }]);
+      }
+      
+      // ニックネーム情報を設定
+      if (!nickNameData && result.nickName) {
+        setNickName(result.nickName);
+        // グローバルステートにも保存
+        setNickNames(prev => [...prev, { key: props.name, nickName: result.nickName, type: "friend" }]);
+      }
     } catch (error) {
-      console.error(`Failed to fetch user info for ${name}:`, error);
+      console.error(`Failed to fetch user info for ${props.name}:`, error);
+    }
+  });
+
+  // メンションされたユーザーの情報を取得
+  createEffect(async () => {
+    if (props.content.mention && props.content.mention.length > 0) {
+      try {
+        const mentionMap = await fetchMultipleEntityInfo(props.content.mention);
+        setMentionInfos(mentionMap);
+      } catch (error) {
+        console.error("メンション情報の取得に失敗しました", error);
+      }
     }
   });
 
   return (
     <li class={isPrimaryClass}>
       <div class="c-talk-chat-box mb-1" onContextMenu={handleContextMenu}>
-        {isPrimary && (
+        {props.isPrimary && (
           <div class="c-talk-chat-icon">
             <img
               src={icon()}
@@ -191,15 +183,23 @@ const ChatOtherMessage = ({
           </div>
         )}
         <div class="c-talk-chat-right">
-          {isPrimary && (
+          {props.isPrimary && (
             <div class="c-talk-chat-name">
               <p>{nickName()}</p>
             </div>
           )}
-          {renderMessageContent(content, name)}
-        </div>
-        <div class="c-talk-chat-date">
-          <p>{convertTime(time)}</p>
+          <div class="flex flex-col space-y-1">
+          <Show when={props.content.mention && props.content.mention.length > 0}>
+              <MentionDisplay mentions={props.content.mention || []} align="start" />
+            </Show>
+            <Show when={props.content.reply?.id}>
+              <ReplyMessagePreview replyId={props.content.reply!.id} />
+            </Show>
+            <div class="flex items-end">
+              {renderMessageContent(props.content, props.name)}
+              <span class="text-xs text-gray-500 ml-2">{convertTime(props.time)}</span>
+            </div>
+          </div>
         </div>
       </div>
 

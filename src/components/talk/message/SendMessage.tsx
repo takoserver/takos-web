@@ -1,4 +1,4 @@
-import { createSignal } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import { ContextMenu } from "./ContextMenu.tsx";
 import {
   convertTime,
@@ -6,29 +6,38 @@ import {
 } from "../../../utils/message/messageUtils.tsx";
 import { renderMessageContent } from "./MessageContent.tsx";
 import { setReplyToMessage } from "../../../utils/message/mentionReply.ts";
+import { MessageContentType } from "../../../types/message.ts";
+import { ReplyMessagePreview } from "./ReplyMessagePreview.tsx";
+import MentionDisplay from "./MentionDisplay.tsx";
 
 const userId = localStorage.getItem("userName") + "@" +
   new URL(window.location.href).hostname;
 
-const ChatSendMessage = (
-  { time, content, isPrimary, isSendPrimary, messageid }: {
-    time: string | number | Date;
-    content: {
-      verified: boolean;
-      encrypted: boolean;
-      content: string;
-      type: "text" | "image" | "video" | "audio" | "file";
-      timestamp: string | number | Date;
-      original?: string | undefined;
+// props型定義に reply と mention を追加
+export interface ChatSendMessageProps {
+  time: string | number | Date;
+  content: {
+    verified: boolean;
+    encrypted: boolean;
+    content: string;
+    type: MessageContentType;
+    timestamp: string | number | Date;
+    original?: string;
+    reply?: {
+      id: string;
     };
-    messageid: string;
-    isPrimary: boolean;
-    isSendPrimary: boolean;
-  },
-) => {
+    mention?: string[];
+  };
+  messageid: string;
+  isPrimary: boolean;
+  isSendPrimary: boolean;
+}
+
+// インターフェースを使用するようにコンポーネント定義を修正
+const ChatSendMessage = (props: ChatSendMessageProps) => {
   const isPrimaryClass = `c-talk-chat self ${
-    isPrimary ? "primary" : "subsequent"
-  }${isSendPrimary ? " mt-2" : ""}`;
+    props.isPrimary ? "primary" : "subsequent"
+  }${props.isSendPrimary ? " mt-2" : ""}`;
 
   // 右クリックメニュー用の状態
   const [showContextMenu, setShowContextMenu] = createSignal(false);
@@ -47,7 +56,7 @@ const ChatSendMessage = (
 
   // メッセージをコピー
   const copyMessage = async () => {
-    const success = await copyMessageContent(content);
+    const success = await copyMessageContent(props.content);
     if (success) {
       alert("メッセージをクリップボードにコピーしました");
     } else {
@@ -64,12 +73,12 @@ const ChatSendMessage = (
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ messageId: messageid }),
+          body: JSON.stringify({ messageId: props.messageid }),
         });
         if (!res.ok) {
           throw new Error("メッセージ削除に失敗しました");
         }
-        console.log("メッセージ削除:", messageid);
+        console.log("メッセージ削除:", props.messageid);
       } catch (error) {
         console.error("メッセージ削除エラー:", error);
       }
@@ -82,7 +91,7 @@ const ChatSendMessage = (
     {
       label: "リプライ",
       onClick: () => {
-        setReplyToMessage(messageid, content.type, content.content);
+        setReplyToMessage(props.messageid, props.content.type, props.content.content);
         setShowContextMenu(false);
       },
     },
@@ -95,17 +104,25 @@ const ChatSendMessage = (
         class="c-talk-chat-box mb-[3px] max-w-full"
         onContextMenu={handleContextMenu}
       >
-        <div class="c-talk-chat-date">
-          <p>{convertTime(time)}</p>
-        </div>
-        <div class="c-talk-chat-right max-w-[calc(100%-45px)]">
-          <p>
-            {renderMessageContent(content, userId)}
-          </p>
+        <div class="c-talk-chat-right flex flex-col items-end ml-auto">
+          <div class="flex flex-col items-end space-y-1 w-full text-right">
+
+            <Show when={props.content.mention && props.content.mention.length > 0}>
+              <MentionDisplay mentions={props.content.mention || []} align="end" />
+            </Show>
+            <Show when={props.content.reply?.id}>
+              <div class="w-full">
+                <ReplyMessagePreview replyId={props.content.reply!.id} />
+              </div>
+            </Show>
+            <div class="flex items-end">
+              <span class="text-xs text-gray-500 mr-2">{convertTime(props.time)}</span>
+              {renderMessageContent(props.content, userId)}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* 右クリックメニュー */}
       {showContextMenu() && (
         <ContextMenu
           x={contextMenuPosition().x}

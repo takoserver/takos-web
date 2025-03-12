@@ -7,6 +7,11 @@ export interface MessageData {
   messageid: string;
   roomid: string;
   original?: string;
+  // リプライとメンション情報を追加
+  reply?: {
+    id: string;
+  };
+  mention: string[];
   serverData: {
     userName: string;
     timestamp: number;
@@ -22,4 +27,9 @@ export interface MessageContent {
   type: string | MessageContentType;
   timestamp: number;
   original?: string;
+  // MessageContentにもリプライとメンションを追加
+  reply?: {
+    id: string;
+  };
+  mention?: string[];
 }

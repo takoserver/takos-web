@@ -219,15 +219,11 @@ export const sendEncryptedMessage = async (
 export const sendHandler = async ({
   type,
   content,
-  mention = [],
-  reply = null,
   original = null,
   isLarge = false,
 }: {
   type: "text" | "file" | "image" | "thumbnail" | "video";
   content: string;
-  mention?: string[];
-  reply?: { id: string; content: string } | null;
   original?: string | null;
   isLarge?: boolean;
 }) => {
@@ -241,6 +237,9 @@ export const sendHandler = async ({
     const [currentOperation, setCurrentOperation] = useAtom(
       currentOperationAtom,
     );
+    // メンションとリプライ状態を取得
+    const [mentionList] = useAtom(mentionListState);
+    const [replyTarget] = useAtom(replyTargetState);
 
     try {
       if (isLarge) {
@@ -277,8 +276,13 @@ export const sendHandler = async ({
         return;
       }
 
-      const processedReply = reply ? { id: reply.id } : undefined;
       const processedOriginal = original ? original : undefined;
+      
+      // メンションリストを処理
+      const mention = mentionList().length > 0 ? mentionList() : undefined;
+      
+      // リプライ情報を処理
+      const processedReply = replyTarget() ? { id: replyTarget()!.id } : undefined;
 
       setCurrentOperation("メッセージを暗号化中...");
       setSendingProgress(50);
@@ -290,7 +294,7 @@ export const sendHandler = async ({
           channel,
           timestamp: new Date().getTime(),
           isLarge,
-          mention,
+          mention: mention ? mention : [],
           reply: processedReply,
           original: processedOriginal,
         },
@@ -323,6 +327,8 @@ export const sendHandler = async ({
 
       if (success) {
         setInputMessage("");
+        // メッセージ送信成功時にメンションとリプライ状態をリセット
+        clearMentionReplyState();
       }
       if (success.status === false) {
         console.error("メッセージ送信に失敗しました");
@@ -342,7 +348,7 @@ export function convertLineBreak(message: string | null | undefined) {
   if (message === null || message === undefined) return;
   const messageValue = JSON.parse(message) as { text: string; format: string };
   if (messageValue.format === "text") {
-    return messageValue.text.split("\n").map((line, index) => (
+    return messageValue.text.split("\n").map((line) => (
       <span>
         {line}
         <br />
@@ -388,12 +394,9 @@ export const sendTextHandler = async () => {
     await sendHandler({
       type: "text",
       content: textContent,
-      mention: mentionsToSend,
-      reply: replyTarget()
-        ? { id: replyTarget()!.id, content: replyTarget()?.content || "" }
-        : null,
     });
-    clearMentionReplyState();
+    // sendHandler内でリセットされるため、ここでの呼び出しは冗長になりました
+    // clearMentionReplyState();
   });
 };
 

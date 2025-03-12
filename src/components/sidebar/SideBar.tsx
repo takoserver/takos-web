@@ -20,6 +20,8 @@ import { createTakosDB } from "../../utils/storage/idb";
 import { isLoadedMessageState } from "../talk/Content";
 import { Home } from "../home/home";
 import { createRoomSelector } from "../../utils/room/roomUtils";
+import { fetchEntityInfo } from "../../utils/chache/Icon.ts";
+import entityInfoCache from "../../utils/chache/Icon.ts";
 
 export function SideBer() {
   const [page] = useAtom(pageState);
@@ -33,14 +35,17 @@ export function SideBer() {
     </>
   );
 }
+
+
 export const fetchingUsersState = atom<
   Map<
     string,
     Promise<{ icon: string; nickName: string; type: "friend" | "group" }>
   >
 >(
-  new Map(),
+  entityInfoCache,
 );
+
 function TalkListFriend({
   latestMessage,
   roomid,
@@ -53,7 +58,6 @@ function TalkListFriend({
   const [nickName, setNickName] = createSignal("");
   const [icon, setIcon] = createSignal("");
   const [roomNickName, setRoomNickName] = useAtom(nickNameState);
-  const [fetchingUsers, setFetchingUsers] = useAtom(fetchingUsersState);
   const [selectedRoom] = useAtom(selectedRoomState);
   createEffect(async () => {
     const match = roomid.match(/^m\{([^}]+)\}@(.+)$/);
@@ -64,54 +68,15 @@ function TalkListFriend({
     const domainFromRoom = match[2];
     const friendUserId = friendUserName + "@" + domainFromRoom;
 
-    // すでに取得中または取得済みならそのPromiseを使用
-    if (!fetchingUsers().has(friendUserId)) {
-      // 新しく取得処理を開始し、Mapに登録
-      const fetchUserInfo = async () => {
-        try {
-          // 並行して両方の情報を取得
-          const [iconResponse, nickNameResponse] = await Promise.all([
-            fetch(
-              `https://${domainFromRoom}/_takos/v1/user/icon/${friendUserId}`,
-            )
-              .then((res) => res.json()),
-            fetch(
-              `https://${domainFromRoom}/_takos/v1/user/nickName/${friendUserId}`,
-            )
-              .then((res) => res.json()),
-          ]);
-
-          return {
-            icon: iconResponse.icon,
-            nickName: nickNameResponse.nickName,
-            type: "friend" as const,
-          };
-        } catch (error) {
-          console.error(
-            `Failed to fetch user info for ${friendUserId}:`,
-            error,
-          );
-          return {
-            icon: "",
-            nickName: friendUserId,
-            type: "friend" as const,
-          };
-        }
-      };
-      const newMap = new Map(fetchingUsers());
-      newMap.set(friendUserId, fetchUserInfo());
-      setFetchingUsers(newMap); // アトムを通じて更新
-    }
-
     try {
-      // 取得が完了するのを待つ
-      const result = await fetchingUsers().get(friendUserId);
+      // 共有キャッシュを使用して情報を取得
+      const result = await fetchEntityInfo(friendUserId, domainFromRoom, "friend");
       if (result) {
         setIcon(result.icon);
         setNickName(result.nickName);
       }
     } catch (error) {
-      console.error(`Error waiting for user info: ${friendUserId}`, error);
+      console.error(`Error fetching user info: ${friendUserId}`, error);
     }
   });
   const setRoomKeyState = useSetAtom(roomKeyState);
@@ -152,7 +117,7 @@ function TalkListFriend({
       }}
     >
       <img
-        src={"data:image/png;base64," + icon()}
+        src={icon()} // 修正: プレフィックスを削除
         alt="icon"
         class="w-12 h-12 rounded-full object-cover"
       />
@@ -236,7 +201,6 @@ function TalkGroup({
   const [roomNickName, setRoomNickName] = useAtom(nickNameState);
   const [groupChannel, setGroupChannel] = useAtom(groupChannelState);
   const setLoadedMessageList = useSetAtom(isLoadedMessageState);
-  const [fetchingUsers, setFetchingUsers] = useAtom(fetchingUsersState);
   const [selectedRoom] = useAtom(selectedRoomState);
   createEffect(async () => {
     const match = roomid.match(/^g\{([^}]+)\}@(.+)$/);
@@ -247,48 +211,15 @@ function TalkGroup({
     const domainFromRoom = match[2];
     const groupId = groupName + "@" + domainFromRoom;
 
-    // すでに取得中または取得済みならそのPromiseを使用
-    if (!fetchingUsers().has(groupId)) {
-      // 新しく取得処理を開始し、Mapに登録
-      const fetchGroupInfo = async () => {
-        try {
-          // 並行して両方の情報を取得
-          const [iconResponse, nameResponse] = await Promise.all([
-            fetch(`https://${domainFromRoom}/_takos/v1/group/icon/${groupId}`)
-              .then((res) => res.json()),
-            fetch(`https://${domainFromRoom}/_takos/v1/group/name/${groupId}`)
-              .then((res) => res.json()),
-          ]);
-
-          return {
-            icon: iconResponse.icon,
-            nickName: nameResponse.name,
-            type: "group" as const,
-          };
-        } catch (error) {
-          console.error(`Failed to fetch group info for ${groupId}:`, error);
-          return {
-            icon: "",
-            nickName: groupId,
-            type: "group" as const,
-          };
-        }
-      };
-
-      const newMap = new Map(fetchingUsers());
-      newMap.set(groupId, fetchGroupInfo());
-      setFetchingUsers(newMap); // アトムを通じて更新
-    }
-
     try {
-      // 取得が完了するのを待つ
-      const result = await fetchingUsers().get(groupId);
+      // 共有キャッシュを使用して情報を取得
+      const result = await fetchEntityInfo(groupId, domainFromRoom, "group");
       if (result) {
         setIcon(result.icon);
         setNickName(result.nickName);
       }
     } catch (error) {
-      console.error(`Error waiting for group info: ${groupId}`, error);
+      console.error(`Error fetching group info: ${groupId}`, error);
     }
   });
   const setRoomKeyState = useSetAtom(roomKeyState);
@@ -329,7 +260,7 @@ function TalkGroup({
       }}
     >
       <img
-        src={"data:image/png;base64," + icon()}
+        src={icon()} // 修正: プレフィックスを削除
         alt="icon"
         class="w-12 h-12 rounded-full object-cover"
       />

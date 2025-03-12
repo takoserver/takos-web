@@ -25,7 +25,7 @@ export const getCachedMessage = async (
       type,
       senderId,
     });
-
+    console.log(serverData);
     const messageData: MessageData = {
       verified: serverData.verified,
       encrypted: serverData.encrypted,
@@ -35,6 +35,9 @@ export const getCachedMessage = async (
       messageid,
       roomid: roomId,
       original: serverData.original,
+      // リプライとメンション情報を追加
+      reply: serverData.value.reply,
+      mention: serverData.value.mention || [],
       serverData: {
         userName: senderId,
         timestamp: Number(serverData.timestamp),
@@ -49,11 +52,17 @@ export const getCachedMessage = async (
     const errorMessage: MessageData = {
       verified: false,
       encrypted: false,
-      content: "メッセージの取得に失敗しました",
-      type: "error",
+      content: JSON.stringify({
+        text: "メッセージが復号されていない可能性があるため、\n表示できません。",
+        format: "text",
+      }),
+      type: "text",
       timestamp: new Date().getTime(),
       messageid,
       roomid: roomId,
+      // エラーメッセージにも空の配列/undefを設定
+      reply: undefined,
+      mention: [],
       serverData: {
         userName: senderId,
         timestamp: new Date().getTime(),

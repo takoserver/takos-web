@@ -33,7 +33,6 @@ export async function getMessage({
   type,
   roomId,
   senderId,
-  // 進捗を追跡するか
   isProgress,
   onProgress,
 }: {

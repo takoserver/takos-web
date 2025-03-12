@@ -1,18 +1,15 @@
 import {
   isSelectRoomState,
-  selectedChannelState,
   selectedRoomState,
 } from "../../utils/room/roomState.ts";
-import { messageListState, messageValueState } from "../../utils/state.ts";
+import { messageListState } from "../../utils/state.ts";
 import { atom, useAtom, useSetAtom } from "solid-jotai";
 import ChatSendMessage from "./message/SendMessage.tsx";
 import ChatOtherMessage from "./message/OtherMessage.tsx";
 import { createEffect, createSignal, For, onMount, Show } from "solid-js";
-import { groupChannelState } from "../sidebar/SideBar.tsx";
 import { MessageContentType, MessageData } from "../../types/message.ts";
 import { getCachedMessage } from "../../utils/message/messageCache.ts";
 import { ChannelSideBar } from "./sideBar/ChannelSideBar.tsx";
-import { Transition } from "solid-transition-group";
 import LoadingAnimation from "./LoadingAnimation.tsx";
 import MentionReplyDisplay from "./send/MentionReplyDisplay.tsx";
 
@@ -40,7 +37,7 @@ function useMessageLoader() {
   const [loaded, setLoaded] = useAtom(isLoadedMessageState);
   const [selectedRoom] = useAtom(selectedRoomState);
   const [messages, setMessages] = useAtom(messagesState);
-  const [messageTimeLine, setMessageTimeLine] = useAtom(messageTimeLineState);
+  const setMessageTimeLine = useSetAtom(messageTimeLineState);
 
   const loadMessages = async () => {
     const currentMessageList = messageList();
@@ -144,7 +141,6 @@ function MessageDisplay({ message }: { message: MessageData }) {
   onMount(() => {
     setTimeout(() => setShow(true), 50);
   });
-
   const messageContent = () => {
     if (message.serverData.userName === myuserName) {
       return (
@@ -157,6 +153,9 @@ function MessageDisplay({ message }: { message: MessageData }) {
             type: message.type as MessageContentType,
             timestamp: message.timestamp,
             original: message.original,
+            // リプライとメンション情報を追加
+            reply: message.reply,
+            mention: message.mention || [], // undefined対策
           }}
           messageid={message.messageid}
           isPrimary={true}
@@ -175,6 +174,9 @@ function MessageDisplay({ message }: { message: MessageData }) {
             type: message.type,
             timestamp: message.timestamp,
             original: message.original,
+            // リプライとメンション情報を追加
+            reply: message.reply,
+            mention: message.mention || [], // undefined対策
           }}
           messageid={message.messageid}
           isPrimary={true}

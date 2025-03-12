@@ -103,6 +103,7 @@ export async function getNotificationSetting({
 }: {
   roomId: string;
 }): Promise<boolean> {
+  console.log(roomId)
   const db = await createTakosDB();
   const setting = await db.get("notification", roomId);
   if (setting === null || setting === undefined) {
@@ -170,8 +171,42 @@ export async function getExcludeUsers({
   return db.get("excludeUsers", `${userId}-${roomId}`);
 }
 
+// 新しい関数: 特定のルームの除外ユーザーリストをすべて取得
+export async function getExcludeUsersList({
+  roomId,
+}: {
+  roomId: string;
+}): Promise<string[]> {
+  if (!roomId) {
+    return [];
+  }
+  const db = await createTakosDB();
+  const tx = db.transaction("excludeUsers", "readonly");
+  const store = tx.objectStore("excludeUsers");
+  const allItems = await store.getAll();
+  
+  // このルームIDに一致する除外ユーザーを抽出
+  const roomExcludedUsers = allItems
+    .filter(item => item.roomId === roomId)
+    .map(item => item.userId);
+    
+  return roomExcludedUsers;
+}
+
+// 除外ユーザーリストを削除する関数
+export async function removeExcludeUser({
+  userId,
+  roomId,
+}: {
+  userId: string;
+  roomId: string;
+}) {
+  const db = await createTakosDB();
+  await db.delete("excludeUsers", `${userId}-${roomId}`);
+}
+
 export function createTakosDB(): Promise<IDBPDatabase<TakosDB>> {
-  return openDB<TakosDB>("takos-db", 17, {
+  return openDB<TakosDB>("takos-db", 19, { // バージョン番号を17から18に増やす
     upgrade(db) {
       if (!db.objectStoreNames.contains("shareKeys")) {
         db.createObjectStore("shareKeys", { keyPath: "key" });
@@ -197,6 +232,9 @@ export function createTakosDB(): Promise<IDBPDatabase<TakosDB>> {
       if (!db.objectStoreNames.contains("encrypteSetting")) {
         db.createObjectStore("encrypteSetting", { keyPath: "key" });
       }
+      if (!db.objectStoreNames.contains("notification")) {
+        db.createObjectStore("notification", { keyPath: "key" });
+      }
       // 許可されたobjectStoreのみ残し、その他を削除
       const allowedStores = [
         "shareKeys",
@@ -207,6 +245,7 @@ export function createTakosDB(): Promise<IDBPDatabase<TakosDB>> {
         "shareSignKeys",
         "excludeUsers",
         "encrypteSetting",
+        "notification" // 追加
       ];
       for (const storeName of Array.from(db.objectStoreNames)) {
         if (!allowedStores.includes(storeName)) {

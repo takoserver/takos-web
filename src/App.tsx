@@ -21,6 +21,7 @@ import { ImageViewer } from "./components/talk/message/ImageViewer.tsx";
 import { VideoPlayer } from "./components/talk/message/VideoPlayer.tsx";
 import { ChannelEditModal } from "./components/talk/sideBar/ChannelEditModal.tsx";
 import { CreateChannelModal } from "./components/talk/sideBar/CreateChannelModal.tsx";
+import { MentionListModal } from "./components/talk/message/MentionDisplay.tsx";
 
 function App(
   { page }: { page?: "home" | "talk" | "friend" | "setting" | "notification" },
@@ -62,6 +63,7 @@ function App(
       )}
       <ImageViewer />
       <VideoPlayer />
+      <MentionListModal />
     </>
   );
 }
