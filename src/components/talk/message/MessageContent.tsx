@@ -5,14 +5,14 @@ import { VideoPlayerComponent } from "./VideoPlayer";
 
 // 暗号化と署名検証の状態を表示するユーティリティ関数を追加
 export function getSecurityStatus(encrypted: boolean, verified: boolean) {
-  const encryptionStatus = encrypted 
-    ? { text: "暗号化済み", icon: "🔒", class: "text-green-600" } 
+  const encryptionStatus = encrypted
+    ? { text: "暗号化済み", icon: "🔒", class: "text-green-600" }
     : { text: "暗号化なし", icon: "🔓", class: "text-yellow-600" };
-  
-  const verificationStatus = verified 
-    ? { text: "署名検証済み", icon: "🔏", class: "text-green-600" } 
+
+  const verificationStatus = verified
+    ? { text: "署名検証済み", icon: "🔏", class: "text-green-600" }
     : { text: "署名未検証", icon: "⚠️", class: "text-yellow-600" };
-  
+
   return { encryptionStatus, verificationStatus };
 }
 

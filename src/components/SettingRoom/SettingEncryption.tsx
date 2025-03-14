@@ -1,11 +1,11 @@
 import { createEffect, createSignal, For, Show } from "solid-js";
 import { useAtom } from "solid-jotai";
-import { 
-  getEncryptSetting, 
-  saveEncryptSetting, 
-  saveExcludeUsers, 
+import {
+  getEncryptSetting,
   getExcludeUsersList,
-  removeExcludeUser
+  removeExcludeUser,
+  saveEncryptSetting,
+  saveExcludeUsers,
 } from "../../utils/storage/idb";
 import {
   selectedFriendTabState,
@@ -34,7 +34,9 @@ export function SettingEncryption(props: SettingEncryptionProps) {
   );
   const [selectedRoom] = useAtom(selectedRoomState);
   const [isSaving, setIsSaving] = createSignal(false);
-  const [saveStatus, setSaveStatus] = createSignal<'success' | 'error' | null>(null);
+  const [saveStatus, setSaveStatus] = createSignal<"success" | "error" | null>(
+    null,
+  );
   const [isEncrypted, setIsEncrypted] = useAtom(isEncryptedAtom);
 
   createEffect(() => {
@@ -65,36 +67,36 @@ export function SettingEncryption(props: SettingEncryptionProps) {
   const saveSettings = async () => {
     const roomId = selectedRoom()?.roomid;
     if (!roomId) return;
-    
+
     setIsSaving(true);
     setSaveStatus(null);
-    
+
     try {
       // 暗号化設定の保存
       await saveEncryptSetting({
         roomId: roomId,
-        isEncrypte: localIsEncrypted() || false
+        isEncrypte: localIsEncrypted() || false,
       });
-      
+
       // グローバルな暗号化状態も更新
       setIsEncrypted(localIsEncrypted() || false);
-      
+
       // 現在の除外リストのユーザーを保存
       // まず既存のユーザーを削除する処理が必要ですが、簡略化のため省略
       // 実際の実装では、既存のユーザーリストを取得して差分を計算する必要があります
-      
+
       for (const userId of localExcludedUsers()) {
         await saveExcludeUsers({
           userId,
-          roomId
+          roomId,
         });
       }
-      
-      setSaveStatus('success');
+
+      setSaveStatus("success");
       setTimeout(() => setSaveStatus(null), 3000);
     } catch (error) {
       console.error("設定の保存中にエラーが発生しました:", error);
-      setSaveStatus('error');
+      setSaveStatus("error");
     } finally {
       setIsSaving(false);
     }
@@ -232,7 +234,7 @@ export function SettingEncryption(props: SettingEncryptionProps) {
           <div class="flex justify-end space-x-3">
             <button
               class={`px-4 py-2 rounded text-white ${
-                isSaving() ? 'bg-gray-500' : 'bg-blue-600 hover:bg-blue-700'
+                isSaving() ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"
               }`}
               onClick={saveSettings}
               disabled={isSaving()}
@@ -240,14 +242,14 @@ export function SettingEncryption(props: SettingEncryptionProps) {
               {isSaving() ? "保存中..." : "保存"}
             </button>
           </div>
-          
-          <Show when={saveStatus() === 'success'}>
+
+          <Show when={saveStatus() === "success"}>
             <div class="mt-3 p-2 bg-green-500 bg-opacity-20 text-green-400 rounded">
               設定が正常に保存されました
             </div>
           </Show>
-          
-          <Show when={saveStatus() === 'error'}>
+
+          <Show when={saveStatus() === "error"}>
             <div class="mt-3 p-2 bg-red-500 bg-opacity-20 text-red-400 rounded">
               設定の保存中にエラーが発生しました
             </div>

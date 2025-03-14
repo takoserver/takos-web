@@ -294,7 +294,7 @@ export const sendHandler = async ({
 
       const room = selectedRoom();
       if (!room?.roomid) return;
-      
+
       const channel = room.type === "friend" ? "friend" : selectedChannel();
       if (!channel) {
         setIsSending(false);
@@ -302,12 +302,14 @@ export const sendHandler = async ({
       }
 
       const processedOriginal = original ? original : undefined;
-      
+
       // メンションリストを処理
       const mention = mentionList().length > 0 ? mentionList() : [];
-      
+
       // リプライ情報を処理
-      const processedReply = replyTarget() ? { id: replyTarget()!.id } : undefined;
+      const processedReply = replyTarget()
+        ? { id: replyTarget()!.id }
+        : undefined;
 
       // 非暗号化メッセージ送信処理
       if (!isEncrypted()) {

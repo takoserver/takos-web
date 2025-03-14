@@ -36,7 +36,6 @@ export function SideBer() {
   );
 }
 
-
 export const fetchingUsersState = atom<
   Map<
     string,
@@ -70,7 +69,11 @@ function TalkListFriend({
 
     try {
       // 共有キャッシュを使用して情報を取得
-      const result = await fetchEntityInfo(friendUserId, domainFromRoom, "friend");
+      const result = await fetchEntityInfo(
+        friendUserId,
+        domainFromRoom,
+        "friend",
+      );
       if (result) {
         setIcon(result.icon);
         setNickName(result.nickName);

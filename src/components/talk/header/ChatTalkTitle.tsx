@@ -14,10 +14,10 @@ export default function ChatTalkTitle() {
         setIsSelectedRoom(false);
         setSelectedRoom(null);
         const url = new URL(window.location.href);
-        const pathSegments = url.pathname.split('/').filter(Boolean);
+        const pathSegments = url.pathname.split("/").filter(Boolean);
         if (pathSegments.length >= 2) {
-          const newPath = '/' + pathSegments[0]; // domain/:page
-          window.history.pushState({}, '', newPath);
+          const newPath = "/" + pathSegments[0]; // domain/:page
+          window.history.pushState({}, "", newPath);
         }
       }}
     >

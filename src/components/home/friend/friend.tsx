@@ -1,12 +1,14 @@
 import { useAtom } from "solid-jotai";
-import { createSignal, createEffect } from "solid-js";
+import { createEffect, createSignal } from "solid-js";
 import { friendsState } from "../../../utils/state";
 import { createTakosDB } from "../../../utils/storage/idb";
 import { homeSelectedAtom } from "../home";
 import { TalkListFriend } from "./talkListConetent";
 
 export const [encrypted, setEncrypted] = createSignal<string[]>([]);
-export const [friendDetailId, setFriendDetailId] = createSignal<string | null>(null);
+export const [friendDetailId, setFriendDetailId] = createSignal<string | null>(
+  null,
+);
 export function Friends() {
   const [selected, setSelected] = useAtom(homeSelectedAtom);
   const [friends] = useAtom(friendsState);

@@ -1,7 +1,7 @@
 import { useAtom } from "solid-jotai";
-import { createSignal, createEffect } from "solid-js";
+import { createEffect, createSignal } from "solid-js";
 import { homeSelectedAtom } from "../home";
-import { friendDetailId, encrypted } from "./friend";
+import { encrypted, friendDetailId } from "./friend";
 
 export function FriendDetail() {
   const [selected, setSelected] = useAtom(homeSelectedAtom);

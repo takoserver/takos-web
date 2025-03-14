@@ -1,7 +1,10 @@
-import { Setter, createEffect, onMount } from "solid-js";
+import { createEffect, onMount, Setter } from "solid-js";
 import { selectedRoomState } from "../../../utils/room/roomState";
 import { useAtom } from "solid-jotai";
-import { getNotificationSetting, saveNotificationSetting } from "../../../utils/storage/idb";
+import {
+  getNotificationSetting,
+  saveNotificationSetting,
+} from "../../../utils/storage/idb";
 
 interface NotificationToggleProps {
   enabled: boolean;
@@ -10,23 +13,23 @@ interface NotificationToggleProps {
 
 export function NotificationToggle(props: NotificationToggleProps) {
   const [selectedRoom, setSelectedRoom] = useAtom(selectedRoomState);
-  
+
   onMount(async () => {
     const room = selectedRoom();
     if (room) {
-        console.log(room);
-      const isNotification = await getNotificationSetting({ 
-        roomId: room.roomid 
+      console.log(room);
+      const isNotification = await getNotificationSetting({
+        roomId: room.roomid,
       });
       props.setEnabled(isNotification);
     }
   });
-  
+
   createEffect(async () => {
     const room = selectedRoom();
     if (room) {
-      const isNotification = await getNotificationSetting({ 
-        roomId: room.roomid 
+      const isNotification = await getNotificationSetting({
+        roomId: room.roomid,
       });
       props.setEnabled(isNotification);
     }
@@ -41,7 +44,7 @@ export function NotificationToggle(props: NotificationToggleProps) {
         props.setEnabled(newValue);
         await saveNotificationSetting({
           roomId: roomid,
-          isNotification: newValue
+          isNotification: newValue,
         });
       }}
     >

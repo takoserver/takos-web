@@ -14,7 +14,7 @@ export function FriendSettingMenu() {
           {/* 上部アイコンメニュー */}
           <div class="flex justify-around items-center w-full px-4 py-6 mb-2">
             {/* 通知アイコン */}
-            <NotificationToggle 
+            <NotificationToggle
               enabled={notificationEnabled()}
               setEnabled={setNotificationEnabled}
             />

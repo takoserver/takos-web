@@ -103,7 +103,7 @@ export async function getNotificationSetting({
 }: {
   roomId: string;
 }): Promise<boolean> {
-  console.log(roomId)
+  console.log(roomId);
   const db = await createTakosDB();
   const setting = await db.get("notification", roomId);
   if (setting === null || setting === undefined) {
@@ -184,12 +184,12 @@ export async function getExcludeUsersList({
   const tx = db.transaction("excludeUsers", "readonly");
   const store = tx.objectStore("excludeUsers");
   const allItems = await store.getAll();
-  
+
   // このルームIDに一致する除外ユーザーを抽出
   const roomExcludedUsers = allItems
-    .filter(item => item.roomId === roomId)
-    .map(item => item.userId);
-    
+    .filter((item) => item.roomId === roomId)
+    .map((item) => item.userId);
+
   return roomExcludedUsers;
 }
 
@@ -245,7 +245,7 @@ export function createTakosDB(): Promise<IDBPDatabase<TakosDB>> {
         "shareSignKeys",
         "excludeUsers",
         "encrypteSetting",
-        "notification" // 追加
+        "notification", // 追加
       ];
       for (const storeName of Array.from(db.objectStoreNames)) {
         if (!allowedStores.includes(storeName)) {

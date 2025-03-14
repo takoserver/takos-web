@@ -53,7 +53,8 @@ export const getCachedMessage = async (
       verified: false,
       encrypted: false,
       content: JSON.stringify({
-        text: "メッセージが復号されていない可能性があるため、\n表示できません。",
+        text:
+          "メッセージが復号されていない可能性があるため、\n表示できません。",
         format: "text",
       }),
       type: "text",

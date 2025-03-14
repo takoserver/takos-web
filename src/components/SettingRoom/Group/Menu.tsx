@@ -17,7 +17,7 @@ export function GroupSettingMenu() {
         <div class="flex flex-col mt-4">
           {/* 上部アイコンメニュー */}
           <div class="flex justify-around items-center w-full px-4 py-6 mb-2">
-            <NotificationToggle 
+            <NotificationToggle
               enabled={notificationEnabled() || false}
               setEnabled={setNotificationEnabled}
             />

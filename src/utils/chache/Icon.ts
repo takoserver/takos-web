@@ -15,7 +15,7 @@ const entityInfoCache = new Map<
 export async function fetchEntityInfo(
   id: string,
   domain: string,
-  type: "friend" | "group"
+  type: "friend" | "group",
 ): Promise<{ icon: string; nickName: string; type: "friend" | "group" }> {
   // すでにキャッシュに存在する場合はそれを返す
   if (entityInfoCache.has(id)) {
@@ -25,20 +25,26 @@ export async function fetchEntityInfo(
   // 新しく取得処理を開始
   const fetchPromise = (async () => {
     try {
-      const endpoints = type === "friend" 
+      const endpoints = type === "friend"
         ? [`user/icon/${id}`, `user/nickName/${id}`]
         : [`group/icon/${id}`, `group/name/${id}`];
 
       // 並行して両方の情報を取得
       const [iconResponse, nameResponse] = await Promise.all([
-        fetch(`https://${domain}/_takos/v1/${endpoints[0]}`).then(res => res.json()),
-        fetch(`https://${domain}/_takos/v1/${endpoints[1]}`).then(res => res.json())
+        fetch(`https://${domain}/_takos/v1/${endpoints[0]}`).then((res) =>
+          res.json()
+        ),
+        fetch(`https://${domain}/_takos/v1/${endpoints[1]}`).then((res) =>
+          res.json()
+        ),
       ]);
 
       const result = {
-        icon: iconResponse.icon ? `data:image/png;base64,${iconResponse.icon}` : "",
+        icon: iconResponse.icon
+          ? `data:image/png;base64,${iconResponse.icon}`
+          : "",
         nickName: type === "friend" ? nameResponse.nickName : nameResponse.name,
-        type
+        type,
       };
 
       return result;
@@ -47,7 +53,7 @@ export async function fetchEntityInfo(
       return {
         icon: "",
         nickName: id,
-        type
+        type,
       };
     }
   })();
@@ -63,28 +69,35 @@ export async function fetchEntityInfo(
  * @param ids エンティティIDの配列
  * @returns エンティティIDをキーとした情報オブジェクトのPromise
  */
-export async function fetchMultipleEntityInfo(ids: string[]): Promise<Map<string, { icon: string; nickName: string; type: "friend" | "group" }>> {
-  const resultMap = new Map<string, { icon: string; nickName: string; type: "friend" | "group" }>();
-  
+export async function fetchMultipleEntityInfo(
+  ids: string[],
+): Promise<
+  Map<string, { icon: string; nickName: string; type: "friend" | "group" }>
+> {
+  const resultMap = new Map<
+    string,
+    { icon: string; nickName: string; type: "friend" | "group" }
+  >();
+
   // 重複排除
   const uniqueIds = [...new Set(ids)];
-  
+
   // グループ化して並列処理
-  const promises = uniqueIds.map(async id => {
-    if(id === "everyone") {
+  const promises = uniqueIds.map(async (id) => {
+    if (id === "everyone") {
       resultMap.set(id, {
         icon: DEFAULT_ICON,
         nickName: "everyone",
-        type: "friend"
+        type: "friend",
       });
     } else {
-    const domain = id.split('@')[1];
-    const type = id.includes('group@') ? 'group' : 'friend';
-    const info = await fetchEntityInfo(id, domain, type);
-    resultMap.set(id, info);
+      const domain = id.split("@")[1];
+      const type = id.includes("group@") ? "group" : "friend";
+      const info = await fetchEntityInfo(id, domain, type);
+      resultMap.set(id, info);
     }
   });
-  
+
   await Promise.all(promises);
   return resultMap;
 }

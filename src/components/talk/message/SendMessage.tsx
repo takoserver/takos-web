@@ -4,7 +4,7 @@ import {
   convertTime,
   copyMessageContent,
 } from "../../../utils/message/messageUtils.tsx";
-import { renderMessageContent, getSecurityStatus } from "./MessageContent.tsx";
+import { getSecurityStatus, renderMessageContent } from "./MessageContent.tsx";
 import { setReplyToMessage } from "../../../utils/message/mentionReply.ts";
 import { MessageContentType } from "../../../types/message.ts";
 import { ReplyMessagePreview } from "./ReplyMessagePreview.tsx";
@@ -93,7 +93,7 @@ const ChatSendMessage = (props: ChatSendMessageProps) => {
   // セキュリティ情報を表示する関数
   const showSecurityInfo = () => {
     const { encryptionStatus, verificationStatus } = getSecurityInfo();
-    
+
     alert(`メッセージセキュリティ情報:
 ${encryptionStatus.icon} ${encryptionStatus.text}
 ${verificationStatus.icon} ${verificationStatus.text}`);
@@ -103,7 +103,10 @@ ${verificationStatus.icon} ${verificationStatus.text}`);
   const securityHeader = () => {
     const { encryptionStatus, verificationStatus } = getSecurityInfo();
     return (
-      <div class="flex justify-between items-center w-full px-1" onClick={showSecurityInfo}>
+      <div
+        class="flex justify-between items-center w-full px-1"
+        onClick={showSecurityInfo}
+      >
         <div class={`flex items-center ${encryptionStatus.class}`}>
           <span class="mr-1">{encryptionStatus.icon}</span>
           <span class="text-sm">{encryptionStatus.text}</span>
@@ -122,7 +125,11 @@ ${verificationStatus.icon} ${verificationStatus.text}`);
     {
       label: "リプライ",
       onClick: () => {
-        setReplyToMessage(props.messageid, props.content.type, props.content.content);
+        setReplyToMessage(
+          props.messageid,
+          props.content.type,
+          props.content.content,
+        );
         setShowContextMenu(false);
       },
     },
@@ -137,9 +144,13 @@ ${verificationStatus.icon} ${verificationStatus.text}`);
       >
         <div class="c-talk-chat-right flex flex-col items-end ml-auto">
           <div class="flex flex-col items-end space-y-1 w-full text-right">
-
-            <Show when={props.content.mention && props.content.mention.length > 0}>
-              <MentionDisplay mentions={props.content.mention || []} align="end" />
+            <Show
+              when={props.content.mention && props.content.mention.length > 0}
+            >
+              <MentionDisplay
+                mentions={props.content.mention || []}
+                align="end"
+              />
             </Show>
             <Show when={props.content.reply?.id}>
               <div class="w-full">
@@ -147,7 +158,9 @@ ${verificationStatus.icon} ${verificationStatus.text}`);
               </div>
             </Show>
             <div class="flex items-end">
-              <span class="text-xs text-gray-500 mr-2">{convertTime(props.time)}</span>
+              <span class="text-xs text-gray-500 mr-2">
+                {convertTime(props.time)}
+              </span>
               {renderMessageContent(props.content, userId)}
             </div>
           </div>

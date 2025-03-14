@@ -1,4 +1,4 @@
-import { createEffect, createSignal, Show, For } from "solid-js";
+import { createEffect, createSignal, For, Show } from "solid-js";
 import { useAtom } from "solid-jotai";
 import { DEFAULT_ICON } from "../../utils/defaultIcon.ts";
 import { iconsState, nickNamesState } from "../../../utils/state.ts";
@@ -10,14 +10,17 @@ import {
   copyMessageContent,
 } from "../../../utils/message/messageUtils.tsx";
 
-import { renderMessageContent, getSecurityStatus } from "./MessageContent.tsx";
+import { getSecurityStatus, renderMessageContent } from "./MessageContent.tsx";
 import {
   mentionEveryone,
   setReplyToMessage,
   toggleMention,
 } from "../../../utils/message/mentionReply.ts";
 import { ReplyMessagePreview } from "./ReplyMessagePreview.tsx";
-import { fetchEntityInfo, fetchMultipleEntityInfo } from "../../../utils/chache/Icon.ts";
+import {
+  fetchEntityInfo,
+  fetchMultipleEntityInfo,
+} from "../../../utils/chache/Icon.ts";
 import MentionDisplay from "./MentionDisplay.tsx";
 
 // props型定義に reply と mention を追加
@@ -96,7 +99,7 @@ const ChatOtherMessage = (props: ChatOtherMessageProps) => {
   // セキュリティ情報を表示する関数
   const showSecurityInfo = () => {
     const { encryptionStatus, verificationStatus } = getSecurityInfo();
-    
+
     alert(`メッセージセキュリティ情報:
 ${encryptionStatus.icon} ${encryptionStatus.text}
 ${verificationStatus.icon} ${verificationStatus.text}`);
@@ -106,7 +109,10 @@ ${verificationStatus.icon} ${verificationStatus.text}`);
   const securityHeader = () => {
     const { encryptionStatus, verificationStatus } = getSecurityInfo();
     return (
-      <div class="flex justify-between items-center w-full px-1" onClick={showSecurityInfo}>
+      <div
+        class="flex justify-between items-center w-full px-1"
+        onClick={showSecurityInfo}
+      >
         <div class={`flex items-center ${encryptionStatus.class}`}>
           <span class="mr-1">{encryptionStatus.icon}</span>
           <span class="text-sm">{encryptionStatus.text}</span>
@@ -125,7 +131,11 @@ ${verificationStatus.icon} ${verificationStatus.text}`);
     {
       label: "リプライ",
       onClick: () => {
-        setReplyToMessage(props.messageid, props.content.type as any, props.content.content);
+        setReplyToMessage(
+          props.messageid,
+          props.content.type as any,
+          props.content.content,
+        );
         setShowContextMenu(false);
       },
     },
@@ -170,19 +180,31 @@ ${verificationStatus.icon} ${verificationStatus.text}`);
       const domain = props.name.split("@")[1];
       // 共有キャッシュから情報を取得
       const result = await fetchEntityInfo(props.name, domain, "friend");
-      
+
       // アイコン情報を設定
       if (!iconData && result.icon) {
         setIcon(result.icon);
         // グローバルステートにも保存
-        setIcons(prev => [...prev, { key: props.name, icon: result.icon, type: "friend" }]);
+        setIcons(
+          (prev) => [...prev, {
+            key: props.name,
+            icon: result.icon,
+            type: "friend",
+          }],
+        );
       }
-      
+
       // ニックネーム情報を設定
       if (!nickNameData && result.nickName) {
         setNickName(result.nickName);
         // グローバルステートにも保存
-        setNickNames(prev => [...prev, { key: props.name, nickName: result.nickName, type: "friend" }]);
+        setNickNames(
+          (prev) => [...prev, {
+            key: props.name,
+            nickName: result.nickName,
+            type: "friend",
+          }],
+        );
       }
     } catch (error) {
       console.error(`Failed to fetch user info for ${props.name}:`, error);
@@ -220,15 +242,22 @@ ${verificationStatus.icon} ${verificationStatus.text}`);
             </div>
           )}
           <div class="flex flex-col space-y-1">
-          <Show when={props.content.mention && props.content.mention.length > 0}>
-              <MentionDisplay mentions={props.content.mention || []} align="start" />
+            <Show
+              when={props.content.mention && props.content.mention.length > 0}
+            >
+              <MentionDisplay
+                mentions={props.content.mention || []}
+                align="start"
+              />
             </Show>
             <Show when={props.content.reply?.id}>
               <ReplyMessagePreview replyId={props.content.reply!.id} />
             </Show>
             <div class="flex items-end">
               {renderMessageContent(props.content, props.name)}
-              <span class="text-xs text-gray-500 ml-2">{convertTime(props.time)}</span>
+              <span class="text-xs text-gray-500 ml-2">
+                {convertTime(props.time)}
+              </span>
             </div>
           </div>
         </div>

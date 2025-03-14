@@ -1,4 +1,12 @@
-import { createSignal, onCleanup, onMount, Show, createEffect, For, JSX } from "solid-js";
+import {
+  createEffect,
+  createSignal,
+  For,
+  JSX,
+  onCleanup,
+  onMount,
+  Show,
+} from "solid-js";
 import { Portal } from "solid-js/web";
 
 type MenuItem = {
@@ -42,10 +50,10 @@ export function ContextMenu(props: ContextMenuProps) {
   const adjustedPosition = () => {
     const maxX = window.innerWidth - 200; // メニューの想定最大幅
     const maxY = window.innerHeight - props.items.length * 40; // メニューの想定最大高さ
-    
+
     return {
       x: Math.min(props.x, maxX),
-      y: Math.min(props.y, maxY)
+      y: Math.min(props.y, maxY),
     };
   };
 
@@ -119,7 +127,7 @@ export function ContextMenu(props: ContextMenuProps) {
               {props.header}
             </div>
           </Show>
-          
+
           <ul class="whitespace-nowrap">
             <For each={props.items}>
               {(item) => (
@@ -132,9 +140,7 @@ export function ContextMenu(props: ContextMenuProps) {
                     props.onClose();
                   }}
                 >
-                  {typeof item.label === "function" 
-                    ? item.label() 
-                    : item.label}
+                  {typeof item.label === "function" ? item.label() : item.label}
                 </li>
               )}
             </For>

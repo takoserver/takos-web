@@ -214,11 +214,15 @@ function ChatSend() {
           stroke-linecap="round"
           stroke-linejoin="round"
         >
-          {isEncrypted() ? (
-            <path d="M12 17a2 2 0 0 0 2-2v-2H10v2a2 2 0 0 0 2 2zm7-7h-1V8A6 6 0 0 0 6 8v2H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z"></path>
-          ) : (
-            <path d="M19 11H5c-1.1 0-2 .9-2 2v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7c0-1.1-.9-2-2-2zm-1 9H6c-.55 0-1-.45-1-1v-5h14v5c0 .55-.45 1-1 1zm-6-13c-2.21 0-4 1.79-4 4v2h2V7c0-1.1.9-2 2-2s2 .9 2 2v2h2V7c0-2.21-1.79-4-4-4z"></path>
-          )}
+          {isEncrypted()
+            ? (
+              <path d="M12 17a2 2 0 0 0 2-2v-2H10v2a2 2 0 0 0 2 2zm7-7h-1V8A6 6 0 0 0 6 8v2H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z">
+              </path>
+            )
+            : (
+              <path d="M19 11H5c-1.1 0-2 .9-2 2v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7c0-1.1-.9-2-2-2zm-1 9H6c-.55 0-1-.45-1-1v-5h14v5c0 .55-.45 1-1 1zm-6-13c-2.21 0-4 1.79-4 4v2h2V7c0-1.1.9-2 2-2s2 .9 2 2v2h2V7c0-2.21-1.79-4-4-4z">
+              </path>
+            )}
         </svg>
       ),
       onClick: () => {
@@ -278,31 +282,49 @@ function ChatSend() {
         </div>
         <div class="flex items-center mt-2">
           {/* 暗号化状態インジケーター */}
-          <div 
+          <div
             class={`flex items-center mr-2 px-2 py-1 rounded-full text-xs ${
-              isEncrypted() 
-                ? 'bg-green-700 bg-opacity-25 text-green-400' 
-                : 'bg-yellow-700 bg-opacity-25 text-yellow-400'
+              isEncrypted()
+                ? "bg-green-700 bg-opacity-25 text-green-400"
+                : "bg-yellow-700 bg-opacity-25 text-yellow-400"
             }`}
             onClick={toggleEncryption}
-            title={isEncrypted() ? "暗号化オン (クリックで切り替え)" : "暗号化オフ (クリックで切り替え)"}
+            title={isEncrypted()
+              ? "暗号化オン (クリックで切り替え)"
+              : "暗号化オフ (クリックで切り替え)"}
             style="cursor: pointer;"
           >
-            {isEncrypted() ? (
-              <>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-                </svg>
-                暗号化
-              </>
-            ) : (
-              <>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z" />
-                </svg>
-                非暗号化
-              </>
-            )}
+            {isEncrypted()
+              ? (
+                <>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-3.5 w-3.5 mr-1"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  暗号化
+                </>
+              )
+              : (
+                <>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-3.5 w-3.5 mr-1"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z" />
+                  </svg>
+                  非暗号化
+                </>
+              )}
           </div>
 
           {/* メニューボタン */}

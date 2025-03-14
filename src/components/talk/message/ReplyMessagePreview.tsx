@@ -1,6 +1,9 @@
 import { createEffect, createSignal, Show } from "solid-js";
 import { MessageContentType } from "../../../types/message";
-import { messagesState, messageTimeLineState } from "../../../components/talk/Content";
+import {
+  messagesState,
+  messageTimeLineState,
+} from "../../../components/talk/Content";
 import { useAtom } from "solid-jotai";
 
 interface ReplyMessagePreviewProps {
@@ -17,12 +20,14 @@ type ExtendedMessageContentType =
   | "thumbnail";
 
 export function ReplyMessagePreview(props: ReplyMessagePreviewProps) {
-  const [replyMessage, setReplyMessage] = createSignal<{
-    content: string;
-    type: ExtendedMessageContentType;
-    userName: string;
-    nickName?: string;
-  } | null>(null);
+  const [replyMessage, setReplyMessage] = createSignal<
+    {
+      content: string;
+      type: ExtendedMessageContentType;
+      userName: string;
+      nickName?: string;
+    } | null
+  >(null);
   const [loading, setLoading] = createSignal(true);
   const [error, setError] = createSignal(false);
   const [messages] = useAtom(messagesState);
@@ -38,10 +43,13 @@ export function ReplyMessagePreview(props: ReplyMessagePreviewProps) {
     try {
       setLoading(true);
       // まず現在表示中のメッセージタイムラインから検索
-      const message = messageTimeLine().find(msg => msg.messageid === props.replyId);
-      
+      const message = messageTimeLine().find((msg) =>
+        msg.messageid === props.replyId
+      );
+
       // 見つからなければ全メッセージから検索
-      const foundMessage = message || messages().find(msg => msg.messageid === props.replyId);
+      const foundMessage = message ||
+        messages().find((msg) => msg.messageid === props.replyId);
 
       if (!foundMessage) {
         setError(true);
@@ -51,7 +59,7 @@ export function ReplyMessagePreview(props: ReplyMessagePreviewProps) {
         content: foundMessage.content,
         type: foundMessage.type as ExtendedMessageContentType,
         userName: foundMessage.serverData.userName,
-        nickName: foundMessage.serverData.userName
+        nickName: foundMessage.serverData.userName,
       });
       setError(false);
     } catch (e) {
@@ -66,10 +74,10 @@ export function ReplyMessagePreview(props: ReplyMessagePreviewProps) {
     if (error()) return "メッセージを取得できませんでした";
     if (loading()) return "読み込み中...";
     if (!replyMessage()) return "メッセージが見つかりません";
-    
+
     const msg = replyMessage()!;
     let preview = "";
-    
+
     try {
       if (msg.type === "text") {
         const content = JSON.parse(msg.content);
@@ -88,27 +96,27 @@ export function ReplyMessagePreview(props: ReplyMessagePreviewProps) {
     } catch (e) {
       preview = "メッセージの解析に失敗しました";
     }
-    
+
     return preview;
   };
 
   const getNickName = () => {
     if (!replyMessage()) return "";
-    return replyMessage()!.nickName || replyMessage()!.userName.split('@')[0];
+    return replyMessage()!.nickName || replyMessage()!.userName.split("@")[0];
   };
 
   const getMessageTypeIcon = () => {
     if (!replyMessage()) return null;
-    
+
     const type = replyMessage()!.type;
     let isImage = type === "image";
     let isVideo = type === "video";
-    
+
     // サムネイルの場合は安全にJSONをパース
     if (type === "thumbnail") {
       try {
         const content = JSON.parse(replyMessage()!.content);
-        if (content && typeof content === 'object' && content.originalType) {
+        if (content && typeof content === "object" && content.originalType) {
           isImage = content.originalType === "image";
           isVideo = content.originalType === "video";
         }
@@ -117,7 +125,7 @@ export function ReplyMessagePreview(props: ReplyMessagePreviewProps) {
         // パースに失敗した場合はデフォルトでテキストアイコンとする
       }
     }
-    
+
     // 画像アイコン
     if (isImage) {
       return (
@@ -125,8 +133,7 @@ export function ReplyMessagePreview(props: ReplyMessagePreviewProps) {
           <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
         </svg>
       );
-    } 
-    // 動画アイコン
+    } // 動画アイコン
     else if (isVideo) {
       return (
         <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="currentColor">
@@ -134,7 +141,7 @@ export function ReplyMessagePreview(props: ReplyMessagePreviewProps) {
         </svg>
       );
     }
-    
+
     // デフォルトはテキストメッセージアイコン
     return (
       <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="currentColor">
@@ -149,16 +156,20 @@ export function ReplyMessagePreview(props: ReplyMessagePreviewProps) {
         {getMessageTypeIcon()}
       </div>
       <div class="flex-1 overflow-hidden">
-        <Show 
-          when={!loading() && !error()} 
+        <Show
+          when={!loading() && !error()}
           fallback={
             <span class="text-gray-600 dark:text-gray-400 italic">
               {loading() ? "読み込み中..." : "メッセージを取得できませんでした"}
             </span>
           }
         >
-          <div class="font-medium text-blue-600 dark:text-blue-400">{getNickName()}</div>
-          <div class="text-gray-700 dark:text-gray-400 truncate text-xs">{getPreviewContent()}</div>
+          <div class="font-medium text-blue-600 dark:text-blue-400">
+            {getNickName()}
+          </div>
+          <div class="text-gray-700 dark:text-gray-400 truncate text-xs">
+            {getPreviewContent()}
+          </div>
         </Show>
       </div>
     </div>
