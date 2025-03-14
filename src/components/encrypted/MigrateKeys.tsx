@@ -17,7 +17,8 @@ import {
 import { createSignal } from "solid-js";
 import fnv1a from "fnv1a";
 import { deviceKeyState } from "../../utils/state";
-import { createTakosDB } from "../../utils/storage/idb";
+import { getAllAccountKeys, getAllAllowKeys } from "../../utils/storage/idb";
+import { TakosFetch } from "../../utils/TakosFetch";
 export const migrateRequestState = atom<boolean>(false);
 const [migrateRequestInput, setMigrateRequestInput] = createSignal(false);
 
@@ -53,7 +54,7 @@ export function MigrateKey() {
                   setMigrateSignKeyPrivate(migrateSignKey.privateKey);
                   setMigrateSignKeyPublic(migrateSignKey.publickKey);
                   console.log(migrateSessioonId());
-                  const res = await fetch("/api/v2/sessions/encrypt/accept", {
+                  const res = await TakosFetch("/api/v2/sessions/encrypt/accept", {
                     method: "POST",
                     headers: {
                       "Content-Type": "application/json",
@@ -116,8 +117,7 @@ export function MigrateKey() {
                 }
                 const deviceKeyS = deviceKey();
                 if (!deviceKeyS) return "";
-                const db = await createTakosDB();
-                const encryptedAccountKyes = await db.getAll("accountKeys");
+                const encryptedAccountKyes = await getAllAccountKeys();
                 const accountKeys = [];
                 for (const accountKey of encryptedAccountKyes) {
                   const decryptedAccountKey = await decryptDataDeviceKey(
@@ -131,7 +131,7 @@ export function MigrateKey() {
                     timestamp: accountKey.timestamp,
                   });
                 }
-                const allowKeys = await db.getAll("allowKeys");
+                const allowKeys = await getAllAllowKeys();
                 const encryptedMasterKey = localStorage.getItem("masterKey");
                 const masterKey = await decryptDataDeviceKey(
                   deviceKeyS,
@@ -153,7 +153,7 @@ export function MigrateKey() {
                   await keyHash(migrateSignKey),
                 );
                 if (!sign) return "";
-                const res = await fetch("/api/v2/sessions/encrypt/send", {
+                const res = await TakosFetch("/api/v2/sessions/encrypt/send", {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",

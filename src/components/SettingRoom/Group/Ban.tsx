@@ -6,6 +6,7 @@ import {
   selectedTabState,
 } from "../../../utils/room/settingRoomState";
 import { For } from "solid-js";
+import { TakosFetch } from "../../../utils/TakosFetch";
 
 export function GroupSettingBan() {
   const [selectedRoom] = useAtom(selectedRoomState);
@@ -55,7 +56,7 @@ export function GroupSettingBan() {
                   setIsLoadingBanList(true);
 
                   try {
-                    const res = await fetch(
+                    const res = await TakosFetch(
                       `https://${match[2]}/_takos/v1/group/bans/${match[1]}@${
                         match[2]
                       }`,
@@ -146,7 +147,7 @@ export function GroupSettingBan() {
                                 )
                               ) {
                                 try {
-                                  const res = await fetch(
+                                  const res = await TakosFetch(
                                     "/api/v2/group/unban",
                                     {
                                       method: "POST",

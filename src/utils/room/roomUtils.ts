@@ -1,3 +1,5 @@
+import { TakosFetch } from "../TakosFetch";
+
 // メッセージの型定義
 export interface Message {
   userName: string;
@@ -76,7 +78,7 @@ export function createRoomSelector({
     setMessageList([]);
 
     if (type === "friend") {
-      const messages = await fetch("/api/v2/message/friend/" + roomid);
+      const messages = await TakosFetch("/api/v2/message/friend/" + roomid);
       const messagesJson = (((await messages.json()).messages) as Message[])
         .sort((a, b) =>
           new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
@@ -100,19 +102,19 @@ export function createRoomSelector({
       const groupId = groupName + "@" + domainFromRoom;
 
       const baseUrl = `https://${domainFromRoom}/_takos/v1/group`;
-      const channelsPromise = fetch(
+      const channelsPromise = TakosFetch(
         `${baseUrl}/channels/${groupId}`,
       ).then((res) => res.json());
-      const rolePromise = fetch(
+      const rolePromise = TakosFetch(
         `${baseUrl}/role/${groupId}`,
       ).then((res) => res.json());
-      const membersPromise = fetch(
+      const membersPromise = TakosFetch(
         `${baseUrl}/members/${groupId}`,
       ).then((res) => res.json());
-      const ownerPromise = fetch(
+      const ownerPromise = TakosFetch(
         `${baseUrl}/owner/${groupId}`,
       ).then((res) => res.json());
-      const defaultChannelPromise = fetch(
+      const defaultChannelPromise = TakosFetch(
         `${baseUrl}/defaultChannel/${groupId}`,
       ).then((res) => res.json());
 
@@ -144,7 +146,7 @@ export function createRoomSelector({
         owner,
       });
 
-      const messages = await fetch(
+      const messages = await TakosFetch(
         "/api/v2/message/group/" + roomid + "/" + defaultChannelId,
       );
       const messagesJson = (((await messages.json()).messages) as Message[])

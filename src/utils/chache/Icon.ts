@@ -1,5 +1,6 @@
 // ユーザー/グループ情報をキャッシュするグローバルMap
 import { DEFAULT_ICON } from "../../components/utils/defaultIcon";
+import { TakosFetch } from "../TakosFetch";
 const entityInfoCache = new Map<
   string,
   Promise<{ icon: string; nickName: string; type: "friend" | "group" }>
@@ -12,7 +13,7 @@ const entityInfoCache = new Map<
  * @param type friendまたはgroup
  * @returns アイコンとニックネームを含むオブジェクトのPromise
  */
-export async function fetchEntityInfo(
+export async function TakosFetchEntityInfo(
   id: string,
   domain: string,
   type: "friend" | "group",
@@ -23,22 +24,23 @@ export async function fetchEntityInfo(
   }
 
   // 新しく取得処理を開始
-  const fetchPromise = (async () => {
+  const TakosFetchPromise = (async () => {
     try {
       const endpoints = type === "friend"
         ? [`user/icon/${id}`, `user/nickName/${id}`]
         : [`group/icon/${id}`, `group/name/${id}`];
 
       // 並行して両方の情報を取得
+      console.log(`https://${domain}/_takos/v1/${endpoints[0]}`);
+      
       const [iconResponse, nameResponse] = await Promise.all([
-        fetch(`https://${domain}/_takos/v1/${endpoints[0]}`).then((res) =>
+        TakosFetch(`https://${domain}/_takos/v1/${endpoints[0]}`).then((res) =>
           res.json()
         ),
-        fetch(`https://${domain}/_takos/v1/${endpoints[1]}`).then((res) =>
+        TakosFetch(`https://${domain}/_takos/v1/${endpoints[1]}`).then((res) =>
           res.json()
         ),
       ]);
-
       const result = {
         icon: iconResponse.icon
           ? `data:image/png;base64,${iconResponse.icon}`
@@ -49,7 +51,7 @@ export async function fetchEntityInfo(
 
       return result;
     } catch (error) {
-      console.error(`Failed to fetch entity info for ${id}:`, error);
+      console.error(`Failed to TakosFetch entity info for ${id}:`, error);
       return {
         icon: "",
         nickName: id,
@@ -59,9 +61,9 @@ export async function fetchEntityInfo(
   })();
 
   // キャッシュに保存
-  entityInfoCache.set(id, fetchPromise);
+  entityInfoCache.set(id, TakosFetchPromise);
 
-  return fetchPromise;
+  return TakosFetchPromise;
 }
 
 /**
@@ -69,7 +71,7 @@ export async function fetchEntityInfo(
  * @param ids エンティティIDの配列
  * @returns エンティティIDをキーとした情報オブジェクトのPromise
  */
-export async function fetchMultipleEntityInfo(
+export async function TakosFetchMultipleEntityInfo(
   ids: string[],
 ): Promise<
   Map<string, { icon: string; nickName: string; type: "friend" | "group" }>
@@ -93,7 +95,7 @@ export async function fetchMultipleEntityInfo(
     } else {
       const domain = id.split("@")[1];
       const type = id.includes("group@") ? "group" : "friend";
-      const info = await fetchEntityInfo(id, domain, type);
+      const info = await TakosFetchEntityInfo(id, domain, type);
       resultMap.set(id, info);
     }
   });

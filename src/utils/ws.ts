@@ -26,7 +26,16 @@ import {
   keyHash,
   verifyDataMigrateSignKey,
 } from "@takos/takos-encrypt-ink";
-import { createTakosDB } from "./storage/idb.ts";
+import { getTauriSessionId, TakosFetch } from "./TakosFetch.ts";
+import { saveAccountKey, saveAllowKey, saveShareKey } from "./storage/idb.ts";
+
+
+declare global {
+  interface Window {
+    isApp?: boolean;
+    serverEndpoint?: string;
+  }
+}
 
 export function createWebsocket(loadedFn: () => void) {
   createRoot(() => {
@@ -50,12 +59,21 @@ export function createWebsocket(loadedFn: () => void) {
     let reconnectTimeout: number | null = null;
 
     // WebSocketを接続する関数
-    const connectWebSocket = () => {
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const host = window.location.host;
-      const websocket = new WebSocket(
-        `${protocol}//${host}/api/v2/ws`,
-      );
+    const connectWebSocket = async () => {
+      const protocol = "wss:"
+      const host = window.serverEndpoint
+      let websocket
+
+      if(window.isApp) {
+        const sessionid = await getTauriSessionId();
+        websocket = new WebSocket(
+          `${protocol}//${host}/api/v2/ws?sessionid=${sessionid}`,
+        );
+      } else {
+        websocket = new WebSocket(
+          `${protocol}//${host}/api/v2/ws`,
+        );
+      }
 
       websocket.onopen = () => {
         setWebsocket(websocket);
@@ -166,7 +184,6 @@ export function createWebsocket(loadedFn: () => void) {
                   userId: string;
                 }[];
               } = JSON.parse(decryptData!);
-              const db = await createTakosDB();
               const deviceKeyS = deviceKey();
               if (!deviceKeyS) {
                 return;
@@ -199,7 +216,7 @@ export function createWebsocket(loadedFn: () => void) {
                 localStorage.getItem("sessionUUID")!,
               );
               if (!shareKey) return;
-              const res = await fetch("/api/v2/sessions/encrypt/success", {
+              const res = await TakosFetch("/api/v2/sessions/encrypt/success", {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -216,17 +233,17 @@ export function createWebsocket(loadedFn: () => void) {
                 deviceKeyS,
                 shareKey.privateKey,
               );
-              await db.put("shareKeys", {
+              await saveShareKey({
                 key: await keyHash(shareKey.publickKey),
                 encryptedKey: encryptedShareKey!,
                 timestamp: JSON.parse(shareKey.publickKey).timestamp,
               });
               localStorage.setItem("masterKey", encryptedMasterKey);
               for (const accountKey of encryptedAccountKeys) {
-                await db.put("accountKeys", accountKey);
+                await saveAccountKey(accountKey);
               }
               for (const allowKey of decryptDataJson.allowKeys) {
-                await db.put("allowKeys", allowKey);
+                await saveAllowKey(allowKey);
               }
               alert("Migrate Success");
               window.location.reload();

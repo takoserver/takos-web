@@ -1,6 +1,7 @@
 import { useAtom } from "solid-jotai";
 import { selectedTabState } from "../../../utils/room/settingRoomState";
 import { selectedRoomState } from "../../../utils/room/roomState";
+import { TakosFetch } from "../../../utils/TakosFetch";
 
 export function GroupSettingLeave() {
   const [selected, setSelected] = useAtom(selectedTabState);
@@ -90,7 +91,7 @@ export function GroupSettingLeave() {
                     }
                     const friendUserName = match[1];
                     const domainFromRoom = match[2];
-                    const res = fetch("/api/v2/group/leave", {
+                    const res = TakosFetch("/api/v2/group/leave", {
                       method: "POST",
                       headers: {
                         "Content-Type": "application/json",

@@ -4,6 +4,7 @@ import { selectedRoomState } from "../../../utils/room/roomState";
 import { useAtom } from "solid-jotai";
 import { uuidv7 } from "uuidv7";
 import { showCreateChannelModalState } from "../Content";
+import { TakosFetch } from "../../../utils/TakosFetch";
 
 export function CreateChannelModal() {
   const [showCreateChannelModal, setShowCreateChannelModal] = useAtom(
@@ -21,7 +22,7 @@ export function CreateChannelModal() {
       if (!match) {
         return console.error("Invalid roomid");
       }
-      const res = await fetch("/api/v2/group/category/add", {
+      const res = await TakosFetch("/api/v2/group/category/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -47,7 +48,7 @@ export function CreateChannelModal() {
       if (!match) {
         return console.error("Invalid roomid");
       }
-      const res = await fetch("/api/v2/group/channel/add", {
+      const res = await TakosFetch("/api/v2/group/channel/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

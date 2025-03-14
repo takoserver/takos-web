@@ -2,6 +2,7 @@ import { useAtom } from "solid-jotai";
 import { createEffect, createSignal } from "solid-js";
 import { homeSelectedAtom } from "../home";
 import { encrypted, friendDetailId } from "./friend";
+import { TakosFetch } from "../../../utils/TakosFetch";
 
 export function FriendDetail() {
   const [selected, setSelected] = useAtom(homeSelectedAtom);
@@ -19,8 +20,8 @@ export function FriendDetail() {
     try {
       const host = friendId.split("@")[1];
       const [iconResponse, nickNameResponse] = await Promise.all([
-        fetch(`https://${host}/_takos/v1/user/icon/${friendId}`),
-        fetch(`https://${host}/_takos/v1/user/nickName/${friendId}`),
+        TakosFetch(`https://${host}/_takos/v1/user/icon/${friendId}`),
+        TakosFetch(`https://${host}/_takos/v1/user/nickName/${friendId}`),
       ]);
 
       const iconData = await iconResponse.json();

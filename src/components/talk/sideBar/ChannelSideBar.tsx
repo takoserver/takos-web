@@ -14,6 +14,7 @@ import {
 } from "../../../utils/room/roomState";
 import { groupChannelState } from "../../sidebar/SideBar";
 import { messageListState } from "../../../utils/state";
+import { TakosFetch } from "../../../utils/TakosFetch";
 
 export function ChannelSideBar() {
   const [showCreateChannelModal, setShowCreateChannelModal] = useAtom(
@@ -140,13 +141,13 @@ export function ChannelSideBar() {
                                 }
 
                                 try {
-                                  const messages = await fetch(
+                                  const messages = await TakosFetch(
                                     "/api/v2/message/group/" +
                                       sellectedRoom()?.roomid + "/" + id,
                                   );
 
                                   if (!messages.ok) {
-                                    console.error("Failed to fetch messages");
+                                    console.error("Failed to TakosFetch messages");
                                     return;
                                   }
 
@@ -173,7 +174,7 @@ export function ChannelSideBar() {
                                   }, 10);
                                 } catch (error) {
                                   console.error(
-                                    "Error fetching messages:",
+                                    "Error TakosFetching messages:",
                                     error,
                                   );
                                 }
@@ -223,7 +224,7 @@ export function ChannelSideBar() {
                                         return console.error("Invalid roomid");
                                       }
 
-                                      const res = await fetch(
+                                      const res = await TakosFetch(
                                         "/api/v2/group/channel/delete",
                                         {
                                           method: "POST",
@@ -258,7 +259,7 @@ export function ChannelSideBar() {
                                         return console.error("Invalid roomid");
                                       }
 
-                                      const res = await fetch(
+                                      const res = await TakosFetch(
                                         "/api/v2/group/channel/default",
                                         {
                                           method: "POST",
@@ -351,7 +352,7 @@ export function ChannelSideBar() {
                                         return console.error("Invalid roomid");
                                       }
 
-                                      const res = await fetch(
+                                      const res = await TakosFetch(
                                         "/api/v2/group/category/delete",
                                         {
                                           method: "POST",

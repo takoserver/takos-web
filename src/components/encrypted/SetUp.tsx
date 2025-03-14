@@ -8,16 +8,15 @@ import { useAtom, useSetAtom } from "solid-jotai";
 import { PopUpFrame } from "./SetUpFrame.tsx";
 import { createEffect, createSignal } from "solid-js";
 import { arrayBufferToBase64 } from "../../utils/buffers.ts";
-import { createTakosDB, encryptAccountKey } from "../../utils/storage/idb.ts";
-import { isLoadedMessageState } from "../talk/Content.tsx";
+import { encryptAccountKey, saveAccountKey, saveShareKey } from "../../utils/storage/idb.ts";
 import {
   encryptDataDeviceKey,
   generateAccountKey,
-  generateIdentityKey,
   generateMasterKey,
   generateShareKey,
   keyHash,
 } from "@takos/takos-encrypt-ink";
+import { TakosFetch } from "../../utils/TakosFetch.ts";
 
 export function SetUp() {
   const [setUp, setSetUp] = useAtom(setUpState);
@@ -82,7 +81,7 @@ export function SetUp() {
                           "accountKey or sharekey is not generated",
                         );
                       }
-                      const resp = await fetch("/api/v2/sessions/setUp", {
+                      const resp = await TakosFetch("/api/v2/sessions/setUp", {
                         method: "POST",
                         headers: {
                           "Content-Type": "application/json",
@@ -124,13 +123,12 @@ export function SetUp() {
                         !encryptedAccountKey || !encryptedShareKey
                       ) throw new Error("encrypted key is not generated");
                       localStorage.setItem("masterKey", encryptedMasterKey);
-                      const db = await createTakosDB();
-                      await db.put("accountKeys", {
+                      await saveAccountKey({
                         key: await keyHash(accountKey.publickKey),
                         encryptedKey: encryptedAccountKey,
                         timestamp: JSON.parse(accountKey.publickKey).timestamp,
                       });
-                      await db.put("shareKeys", {
+                      await saveShareKey({
                         key: await keyHash(sharekey.publickKey),
                         encryptedKey: encryptedShareKey,
                         timestamp: JSON.parse(sharekey.publickKey).timestamp,

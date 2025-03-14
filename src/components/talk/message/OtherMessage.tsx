@@ -18,8 +18,8 @@ import {
 } from "../../../utils/message/mentionReply.ts";
 import { ReplyMessagePreview } from "./ReplyMessagePreview.tsx";
 import {
-  fetchEntityInfo,
-  fetchMultipleEntityInfo,
+  TakosFetchEntityInfo,
+  TakosFetchMultipleEntityInfo,
 } from "../../../utils/chache/Icon.ts";
 import MentionDisplay from "./MentionDisplay.tsx";
 
@@ -41,7 +41,7 @@ export interface ChatOtherMessageProps {
   };
   messageid: string;
   isPrimary: boolean;
-  isFetch?: boolean;
+  isTakosFetch?: boolean;
 }
 
 // インターフェースを使用するようにコンポーネント定義を修正
@@ -157,7 +157,7 @@ ${verificationStatus.icon} ${verificationStatus.text}`);
   ];
 
   createEffect(async () => {
-    if (!props.isFetch) return;
+    if (!props.isTakosFetch) return;
 
     // ローカルステートから情報を取得
     const iconData = icons().find((value) => value.key === props.name);
@@ -179,7 +179,7 @@ ${verificationStatus.icon} ${verificationStatus.text}`);
     try {
       const domain = props.name.split("@")[1];
       // 共有キャッシュから情報を取得
-      const result = await fetchEntityInfo(props.name, domain, "friend");
+      const result = await TakosFetchEntityInfo(props.name, domain, "friend");
 
       // アイコン情報を設定
       if (!iconData && result.icon) {
@@ -207,7 +207,7 @@ ${verificationStatus.icon} ${verificationStatus.text}`);
         );
       }
     } catch (error) {
-      console.error(`Failed to fetch user info for ${props.name}:`, error);
+      console.error(`Failed to TakosFetch user info for ${props.name}:`, error);
     }
   });
 
@@ -215,7 +215,7 @@ ${verificationStatus.icon} ${verificationStatus.text}`);
   createEffect(async () => {
     if (props.content.mention && props.content.mention.length > 0) {
       try {
-        const mentionMap = await fetchMultipleEntityInfo(props.content.mention);
+        const mentionMap = await TakosFetchMultipleEntityInfo(props.content.mention);
         setMentionInfos(mentionMap);
       } catch (error) {
         console.error("メンション情報の取得に失敗しました", error);

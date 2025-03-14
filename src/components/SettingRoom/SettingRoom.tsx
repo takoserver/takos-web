@@ -40,6 +40,7 @@ import {
 } from "../../utils/room/settingRoomState.ts";
 import { GroupSetting } from "./Group/Group.tsx";
 import { FriendSetting } from "./Friends/Friend.tsx";
+import { TakosFetch } from "../../utils/TakosFetch.ts";
 
 export function SettingRoom() {
   const [showGroupPopUp, setShowGroupPopUp] = useAtom(openConfig);
@@ -104,7 +105,7 @@ export function SettingRoom() {
   createEffect(() => {
     if (selected() === "invite") {
       async function getFriendList() {
-        const res = await (await fetch("/api/v2/friend/list", {
+        const res = await (await TakosFetch("/api/v2/friend/list", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -117,7 +118,7 @@ export function SettingRoom() {
   });
   createEffect(() => {
     if (selected() === "request") {
-      const fetchJoinRequests = async () => {
+      const TakosFetchJoinRequests = async () => {
         setIsLoadingRequests(true);
         const match = selectedRoom()?.roomid.match(/^g\{([^}]+)\}@(.+)$/);
         if (!match) {
@@ -125,7 +126,7 @@ export function SettingRoom() {
           return;
         }
         try {
-          const res = await fetch(
+          const res = await TakosFetch(
             `https://${match[2]}/_takos/v1/group/requests/${
               match[1] + "@" + match[2]
             }`,
@@ -141,12 +142,12 @@ export function SettingRoom() {
         }
       };
 
-      fetchJoinRequests();
+      TakosFetchJoinRequests();
     }
   });
   createEffect(() => {
     if (selected() === "ban") {
-      const fetchBannedUsers = async () => {
+      const TakosFetchBannedUsers = async () => {
         setIsLoadingBanList(true);
         const match = selectedRoom()?.roomid.match(/^g\{([^}]+)\}@(.+)$/);
         if (!match) {
@@ -155,7 +156,7 @@ export function SettingRoom() {
         }
 
         try {
-          const res = await fetch(
+          const res = await TakosFetch(
             `https://${match[2]}/_takos/v1/group/bans/${match[1]}@${match[2]}`,
           );
 
@@ -170,7 +171,7 @@ export function SettingRoom() {
         }
       };
 
-      fetchBannedUsers();
+      TakosFetchBannedUsers();
     }
   });
   createEffect(async () => {
@@ -185,23 +186,23 @@ export function SettingRoom() {
       }
       const friendUserName = match[1];
       const domainFromRoom = match[2];
-      const icon = (await (await fetch(
+      const icon = (await (await TakosFetch(
         `https://${domainFromRoom}/_takos/v1/group/icon/${
           friendUserName + "@" + domainFromRoom
         }`,
       )).json()).icon;
       setGroupIcon(icon);
-      const nickName = (await (await fetch(
+      const nickName = (await (await TakosFetch(
         `https://${domainFromRoom}/_takos/v1/group/name/${
           friendUserName + "@" + domainFromRoom
         }`,
       )).json()).name;
-      const description = (await (await fetch(
+      const description = (await (await TakosFetch(
         `https://${domainFromRoom}/_takos/v1/group/description/${
           friendUserName + "@" + domainFromRoom
         }`,
       )).json()).description;
-      const allowJoin = (await (await fetch(
+      const allowJoin = (await (await TakosFetch(
         `https://${domainFromRoom}/_takos/v1/group/allowJoin/${
           friendUserName + "@" + domainFromRoom
         }`,

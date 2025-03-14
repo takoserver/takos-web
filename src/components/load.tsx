@@ -26,7 +26,6 @@ import {
   verifyDataShareSignKey,
   verifyMasterKey,
 } from "@takos/takos-encrypt-ink";
-import { createTakosDB } from "../utils/storage/idb";
 import {
   isSelectRoomState,
   nickNameState,
@@ -43,6 +42,8 @@ import { isLoadedMessageState } from "./talk/Content";
 import { createEffect } from "solid-js";
 import { groupChannelState } from "./sidebar/SideBar";
 import { getMessage } from "../utils/message/getMessage";
+import { TakosFetch } from "../utils/TakosFetch";
+import { getShareKey, saveAccountKey } from "../utils/storage/idb";
 
 export function Loading() {
   return (
@@ -132,7 +133,7 @@ export function Load() {
   async function loadSession() {
     let sessionData;
     try {
-      sessionData = await fetch("/api/v2/sessions/status", {
+      sessionData = await TakosFetch("/api/v2/sessions/status", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -153,7 +154,7 @@ export function Load() {
     console.log("session");
     if (session.login) {
       setLogin(true);
-      fetch("/_takos/v1/user/nickName/" + userName, {
+      TakosFetch("/_takos/v1/user/nickName/" + userName, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -164,13 +165,13 @@ export function Load() {
             setNickName(data.nickName);
           }
         });
-      fetch("/_takos/v1/user/description/" + userName).then((res) => res.json())
+      TakosFetch("/_takos/v1/user/description/" + userName).then((res) => res.json())
         .then((data) => {
           if (data.description) {
             setDiscription(data.description);
           }
         });
-      fetch("/_takos/v1/user/icon/" + userName).then((res) => res.json()).then(
+      TakosFetch("/_takos/v1/user/icon/" + userName).then((res) => res.json()).then(
         (data) => {
           setIcon(data.icon);
         },
@@ -183,7 +184,7 @@ export function Load() {
       return;
     }
     if (session.setup) {
-      const icon = await fetch(
+      const icon = await TakosFetch(
         "/_takos/v1/user/icon/" + userName,
         {
           method: "GET",
@@ -362,12 +363,12 @@ export function Load() {
                     ? `https://${domain}/_takos/v1/user/nickName/${fullId}`
                     : `https://${domain}/_takos/v1/group/name/${fullId}`;
 
-                  const response = await fetch(endpoint);
+                  const response = await TakosFetch(endpoint);
                   const data = await response.json();
 
                   return type === "friend" ? data.nickName : data.name;
                 } catch (error) {
-                  console.error("Error fetching nickname:", error);
+                  console.error("Error TakosFetching nickname:", error);
                   return roomid;
                 }
               };
@@ -396,7 +397,7 @@ export function Load() {
 }
 
 export async function saveSharedAccountKey(hash: string, deviceKey: string) {
-  const sharedAccountKey = await fetch(
+  const sharedAccountKey = await TakosFetch(
     "/api/v2/keys/accountKey?hash=" + encodeURIComponent(hash),
   )
     .then((res) => res.json());
@@ -404,7 +405,7 @@ export async function saveSharedAccountKey(hash: string, deviceKey: string) {
     return;
   }
   const shareSingKeyHash = JSON.parse(sharedAccountKey.shareDataSign).keyHash;
-  const shareDataSign = await fetch(
+  const shareDataSign = await TakosFetch(
     "/api/v2/keys/shareSignKey?hash=" + encodeURIComponent(shareSingKeyHash),
   ).then((res) => res.json());
   if (!shareDataSign) {
@@ -438,9 +439,8 @@ export async function saveSharedAccountKey(hash: string, deviceKey: string) {
   ) {
     return;
   }
-  const db = await createTakosDB();
   const shareKeyHash = JSON.parse(sharedAccountKey.accountKey).keyHash;
-  const encshareKey = await db.get("shareKeys", shareKeyHash);
+  const encshareKey = await getShareKey(shareKeyHash);
   if (!encshareKey) {
     return;
   }
@@ -468,12 +468,12 @@ export async function saveSharedAccountKey(hash: string, deviceKey: string) {
     console.log("verifyDataShareSignKey failed");
     return;
   }
-  await db.put("accountKeys", {
+  await  saveAccountKey({
     key: await keyHash(JSON.parse(accountKey).publicKey),
     encryptedKey: accountKey,
     timestamp: (JSON.parse(JSON.parse(accountKey).publicKey)).timestamp,
   });
-  await fetch("/api/v2/keys/accountKey/notify", {
+  await TakosFetch("/api/v2/keys/accountKey/notify", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -2,7 +2,6 @@ import { atom, useAtom, useAtomValue, useSetAtom } from "solid-jotai";
 import { createRoot } from "solid-js";
 import { selectedChannelState, selectedRoomState } from "../room/roomState";
 import { deviceKeyState, inputMessageState } from "../state";
-import { createTakosDB } from "../storage/idb";
 import { decryptDataDeviceKey, encryptMessage } from "@takos/takos-encrypt-ink";
 import { createRoomKey } from "../room/createRoomKey";
 import { getIdentityKeys } from "../crypto/getIdentityKeys";
@@ -14,11 +13,9 @@ import {
   mentionListState,
   replyTargetState,
 } from "./mentionReply";
-import { getEncryptSetting } from "../storage/idb";
-
-const userId = localStorage.getItem("userName") + "@" +
-  new URL(window.location.href).hostname;
-
+import { getAllRoomKeys, getEncryptSetting } from "../storage/idb";
+import { TakosFetch } from "../TakosFetch";
+import { userId } from "../userId";
 // Global state atoms
 export const isSendingAtom = atom(false);
 export const sendingProgressAtom = atom(0);
@@ -155,8 +152,7 @@ export const getRoomKeyOrCreate = async (
     latestIdentityKey: any;
   },
 ) => {
-  const db = await createTakosDB();
-  const roomKeys = await db.getAll("RoomKeys");
+  const roomKeys = await getAllRoomKeys()
   const encryptedRoomKey = roomKeys
     .sort((a, b) => b.timestamp - a.timestamp)
     .filter((key) => key.roomid === room.roomid)[0];
@@ -208,7 +204,7 @@ export const sendEncryptedMessage = async (
     channelId: string;
   },
 ) => {
-  const res = await fetch("/api/v2/message/send", {
+  const res = await TakosFetch("/api/v2/message/send", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -239,7 +235,7 @@ export const sendUnencryptedMessage = async (
     channelId: string;
   },
 ) => {
-  const res = await fetch("/api/v2/message/send", {
+  const res = await TakosFetch("/api/v2/message/send", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -526,7 +522,7 @@ export async function copyMessageContent(content: {
         try {
           const dataUrl =
             `data:${imageContent.metadata.mimeType};base64,${imageContent.uri}`;
-          const blob = await fetch(dataUrl).then((res) => res.blob());
+          const blob = await TakosFetch(dataUrl).then((res) => res.blob());
           const clipboardItem = new ClipboardItem({
             [imageContent.metadata.mimeType]: blob,
           });

@@ -1,3 +1,4 @@
+import { TakosFetch } from "../../utils/TakosFetch";
 import {
   PopUpFrame,
   PopUpInput,
@@ -5,7 +6,6 @@ import {
   PopUpTitle,
 } from "../utils/popUpFrame";
 import { Accessor, createSignal } from "solid-js";
-import { requester } from "../../utils/requester";
 export function Register() {
   const [open, setOpen] = createSignal(false);
   const [page, setPage] = createSignal(0);
@@ -37,7 +37,7 @@ export function Register() {
                 setPassword("");
                 setCheckCode("");
                 setUserName("");
-                const response = await fetch(
+                const response = await TakosFetch(
                   "./api/v2/sessions/register/temp",
                   {
                     method: "POST",
@@ -79,7 +79,7 @@ export function Register() {
               onSubmit={async (e) => {
                 e.preventDefault();
                 const code = checkCode();
-                const response = await fetch(
+                const response = await TakosFetch(
                   "./api/v2/sessions/register/check",
                   {
                     method: "POST",
@@ -121,7 +121,7 @@ export function Register() {
             <form
               onSubmit={async (e) => {
                 e.preventDefault();
-                const response = await fetch(
+                const response = await TakosFetch(
                   "./api/v2/sessions/register",
                   {
                     method: "POST",

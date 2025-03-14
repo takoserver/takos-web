@@ -1,39 +1,17 @@
-import { atom, useAtom, useAtomValue, useSetAtom } from "solid-jotai";
+import { atom, useAtom, useAtomValue } from "solid-jotai";
 
 import {
   descriptionState,
-  deviceKeyState,
-  friendsState,
   iconState,
   nicknameState,
   talkListState,
 } from "../../utils/state";
-import { createEffect, createSignal, onMount, Show } from "solid-js";
+import { createEffect, createSignal } from "solid-js";
+import { TakosFetchingUsersState } from "../sidebar/SideBar";
 import {
-  clearDB,
-  createTakosDB,
-  decryptShareSignKey,
-  encryptAccountKey,
-} from "../../utils/storage/idb";
-import {
-  decryptDataDeviceKey,
-  encryptDataDeviceKey,
-  encryptDataShareKey,
-  generateAccountKey,
-  keyHash,
-  signDataShareSignKey,
-  verifyMasterKey,
-} from "@takos/takos-encrypt-ink";
-import hash from "fnv1a";
-import { fetchingUsersState } from "../sidebar/SideBar";
-import { PopUpFrame, PopUpInput, PopUpTitle } from "../utils/popUpFrame";
-import {
-  fetchEntityInfo,
-  fetchMultipleEntityInfo,
+  TakosFetchMultipleEntityInfo,
 } from "../../utils/chache/Icon";
 
-const userId = localStorage.getItem("userName") + "@" +
-  new URL(window.location.href).hostname;
 export const homeSelectedAtom = atom<
   | null
   | string
@@ -51,6 +29,7 @@ import { FriendVerify } from "./friend/friendVerify";
 import { Friends } from "./friend/friend";
 import { FriendDetail } from "./friend/detail";
 import { AddUserUI } from "./AddFriend";
+import { userId } from "../../utils/userId";
 
 export function Home() {
   const [selected, setSelected] = useAtom(homeSelectedAtom);
@@ -62,7 +41,7 @@ export function Home() {
   const [exampleFriendIcon, setExampleFriendIcon] = createSignal("");
   const [exampleGroupIcon, setExampleGroupIcon] = createSignal("");
   const [exampleGroupName, setExampleGroupName] = createSignal("");
-  const [fetchingUsers, setFetchingUsers] = useAtom(fetchingUsersState);
+  const [TakosFetchingUsers, setTakosFetchingUsers] = useAtom(TakosFetchingUsersState);
 
   createEffect(async () => {
     const friends = [];
@@ -96,7 +75,7 @@ export function Home() {
       const displayFriends = friends.slice(0, 3);
       try {
         // Icon.tsを使って友達情報を一括取得
-        const friendsInfoMap = await fetchMultipleEntityInfo(displayFriends);
+        const friendsInfoMap = await TakosFetchMultipleEntityInfo(displayFriends);
 
         // 友達の名前をカンマ区切りで設定
         const friendNames = Array.from(friendsInfoMap.values()).map((info) =>
@@ -114,7 +93,7 @@ export function Home() {
           );
         }
       } catch (error) {
-        console.error("Error fetching friend info:", error);
+        console.error("Error TakosFetching friend info:", error);
       }
     }
 
@@ -123,7 +102,7 @@ export function Home() {
       const displayGroups = groups.slice(0, 3);
       try {
         // Icon.tsを使ってグループ情報を一括取得
-        const groupsInfoMap = await fetchMultipleEntityInfo(displayGroups);
+        const groupsInfoMap = await TakosFetchMultipleEntityInfo(displayGroups);
 
         // グループの名前をカンマ区切りで設定
         const groupNames = Array.from(groupsInfoMap.values()).map((info) =>
@@ -139,7 +118,7 @@ export function Home() {
           );
         }
       } catch (error) {
-        console.error("Error fetching group info:", error);
+        console.error("Error TakosFetching group info:", error);
       }
     }
   });

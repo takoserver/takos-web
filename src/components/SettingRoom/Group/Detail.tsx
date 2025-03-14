@@ -11,6 +11,7 @@ import {
   updatedGroupIsPrivateState,
   updatedGroupNameState,
 } from "../../../utils/room/settingRoomState";
+import { TakosFetch } from "../../../utils/TakosFetch";
 
 export function GroupSettingDetail() {
   const [selectedRoom] = useAtom(selectedRoomState);
@@ -239,7 +240,7 @@ export function GroupSettingDetail() {
                     }
 
                     // 更新データを送信
-                    const res = await fetch(
+                    const res = await TakosFetch(
                       "./api/v2/group/settings",
                       {
                         method: "POST",

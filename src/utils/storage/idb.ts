@@ -4,7 +4,108 @@ import {
   isValidAccountKeyPublic,
   keyHash,
 } from "@takos/takos-encrypt-ink";
+import { load, Store } from '@tauri-apps/plugin-store';
 import { DBSchema, IDBPDatabase, openDB } from "idb";
+
+// ストレージインターフェース定義
+type StoreNames = "shareKeys" | "identityKeys" | "accountKeys" | "RoomKeys" | "allowKeys" | "shareSignKeys" | "excludeUsers" | "encrypteSetting" | "notification";
+
+interface StorageInterface {
+  get<T extends StoreNames>(storeName: T, key: string): Promise<TakosDB[T]['value'] | undefined>;
+  put<T extends StoreNames>(storeName: T, value: TakosDB[T]['value']): Promise<void>;
+  getAll<T extends StoreNames>(storeName: T): Promise<TakosDB[T]['value'][]>;
+  delete<T extends StoreNames>(storeName: T, key: string): Promise<void>;
+  clear<T extends StoreNames>(storeName: T): Promise<void>;
+}
+
+// IndexedDB実装
+class IndexedDBStorage implements StorageInterface {
+  private db: Promise<IDBPDatabase<TakosDB>>;
+
+  constructor() {
+    this.db = createTakosDB();
+  }
+
+  async get<T extends StoreNames>(storeName: T, key: string): Promise<TakosDB[T]['value'] | undefined> {
+    const db = await this.db;
+    return db.get(storeName, key);
+  }
+
+  async put<T extends StoreNames>(storeName: T, value: TakosDB[T]['value']): Promise<void> {
+    const db = await this.db;
+    await db.put(storeName, value);
+  }
+
+  async getAll<T extends StoreNames>(storeName: T): Promise<TakosDB[T]['value'][]> {
+    const db = await this.db;
+    return db.getAll(storeName);
+  }
+
+  async delete<T extends StoreNames>(storeName: T, key: string): Promise<void> {
+    const db = await this.db;
+    await db.delete(storeName, key);
+  }
+
+  async clear<T extends StoreNames>(storeName: T): Promise<void> {
+    const db = await this.db;
+    await db.clear(storeName);
+  }
+}
+
+// Tauriストア実装
+class TauriStorage implements StorageInterface {
+  private stores: Map<string, Store> = new Map();
+
+  async getStore(storeName: StoreNames): Promise<Store> {
+    if (!this.stores.has(storeName)) {
+      const store = await load(storeName);
+      this.stores.set(storeName, store);
+    }
+    return this.stores.get(storeName)!;
+  }
+
+  async get<T extends StoreNames>(storeName: T, key: string): Promise<TakosDB[T]['value'] | undefined> {
+    const store = await this.getStore(storeName);
+    return await store.get(key);
+  }
+
+  async put<T extends StoreNames>(storeName: T, value: TakosDB[T]['value']): Promise<void> {
+    const store = await this.getStore(storeName);
+    await store.set(value.key, value);
+    await store.save();
+  }
+
+  async getAll<T extends StoreNames>(storeName: T): Promise<TakosDB[T]['value'][]> {
+    const store = await this.getStore(storeName);
+    const entries = await store.entries();
+    const result: TakosDB[T]['value'][] = [];
+    for (const [k, v] of entries) {
+      result.push(v as TakosDB[T]['value']);
+    }
+    return result;
+  }
+
+  async delete<T extends StoreNames>(storeName: T, key: string): Promise<void> {
+    const store = await this.getStore(storeName);
+    await store.delete(key);
+    await store.save();
+  }
+
+  async clear<T extends StoreNames>(storeName: T): Promise<void> {
+    const store = await this.getStore(storeName);
+    const entries = await store.entries();
+    for (const key of Object.keys(entries)) {
+      await store.delete(key);
+    }
+    await store.save();
+  }
+}
+
+// ストレージファクトリ
+const storageInstance: StorageInterface = (window as any).isApp 
+  ? new TauriStorage() 
+  : new IndexedDBStorage();
+
 export interface TakosDB extends DBSchema {
   shareKeys: {
     key: string;
@@ -91,8 +192,7 @@ export async function saveNotificationSetting({
   roomId: string;
   isNotification: boolean;
 }) {
-  const db = await createTakosDB();
-  await db.put("notification", {
+  await storageInstance.put("notification", {
     key: roomId,
     isNotification,
   });
@@ -104,8 +204,7 @@ export async function getNotificationSetting({
   roomId: string;
 }): Promise<boolean> {
   console.log(roomId);
-  const db = await createTakosDB();
-  const setting = await db.get("notification", roomId);
+  const setting = await storageInstance.get("notification", roomId);
   if (setting === null || setting === undefined) {
     return true;
   }
@@ -119,8 +218,7 @@ export async function saveEncryptSetting({
   roomId: string;
   isEncrypte: boolean;
 }) {
-  const db = await createTakosDB();
-  await db.put("encrypteSetting", {
+  await storageInstance.put("encrypteSetting", {
     key: roomId,
     isEncrypte,
     timestamp: Date.now(),
@@ -133,8 +231,7 @@ export async function getEncryptSetting(
   if (!roomId) {
     throw new Error("roomId is required");
   }
-  const db = await createTakosDB();
-  const setting = await db.get("encrypteSetting", roomId);
+  const setting = await storageInstance.get("encrypteSetting", roomId);
 
   if (setting === null || setting === undefined) {
     return true; // 設定がない場合はデフォルトでtrue
@@ -151,8 +248,7 @@ export async function saveExcludeUsers({
   userId: string;
   roomId: string;
 }) {
-  const db = await createTakosDB();
-  await db.put("excludeUsers", {
+  await storageInstance.put("excludeUsers", {
     key: `${userId}-${roomId}`,
     userId,
     roomId,
@@ -167,8 +263,7 @@ export async function getExcludeUsers({
   userId: string;
   roomId: string;
 }) {
-  const db = await createTakosDB();
-  return db.get("excludeUsers", `${userId}-${roomId}`);
+  return storageInstance.get("excludeUsers", `${userId}-${roomId}`);
 }
 
 // 新しい関数: 特定のルームの除外ユーザーリストをすべて取得
@@ -180,10 +275,8 @@ export async function getExcludeUsersList({
   if (!roomId) {
     return [];
   }
-  const db = await createTakosDB();
-  const tx = db.transaction("excludeUsers", "readonly");
-  const store = tx.objectStore("excludeUsers");
-  const allItems = await store.getAll();
+  
+  const allItems = await storageInstance.getAll("excludeUsers");
 
   // このルームIDに一致する除外ユーザーを抽出
   const roomExcludedUsers = allItems
@@ -201,12 +294,11 @@ export async function removeExcludeUser({
   userId: string;
   roomId: string;
 }) {
-  const db = await createTakosDB();
-  await db.delete("excludeUsers", `${userId}-${roomId}`);
+  await storageInstance.delete("excludeUsers", `${userId}-${roomId}`);
 }
 
 export function createTakosDB(): Promise<IDBPDatabase<TakosDB>> {
-  return openDB<TakosDB>("takos-db", 19, { // バージョン番号を17から18に増やす
+  return openDB<TakosDB>("takos-db", 19, {
     upgrade(db) {
       if (!db.objectStoreNames.contains("shareKeys")) {
         db.createObjectStore("shareKeys", { keyPath: "key" });
@@ -245,7 +337,7 @@ export function createTakosDB(): Promise<IDBPDatabase<TakosDB>> {
         "shareSignKeys",
         "excludeUsers",
         "encrypteSetting",
-        "notification", // 追加
+        "notification",
       ];
       for (const storeName of Array.from(db.objectStoreNames)) {
         if (!allowedStores.includes(storeName)) {
@@ -379,12 +471,160 @@ export async function decryptShareSignKey({
   return JSON.parse(decryptedShareSignKey) as ShareSignKey;
 }
 
+export async function saveShareKey({
+  key,
+  encryptedKey,
+  timestamp,
+}: {
+  key: string;
+  encryptedKey: string;
+  timestamp: number;
+}) {
+  await storageInstance.put("shareKeys", {
+    key: key,
+    encryptedKey,
+    timestamp
+  });
+}
+
+export async function getShareKey({ key }: { key: string }) {
+  return storageInstance.get("shareKeys", key);
+}
+
+export async function getAccountKey({ key }: { key: string }) {
+  return storageInstance.get("accountKeys", key);
+}
+
+export async function saveAccountKey({
+  key,
+  encryptedKey,
+  timestamp,
+}: {
+  key: string;
+  encryptedKey: string;
+  timestamp: number;
+}) {
+  await storageInstance.put("accountKeys", {
+    key: key,
+    encryptedKey,
+    timestamp
+  });
+}
+
+export async function getIdentityKey({ key }: { key: string }) {
+  return storageInstance.get("identityKeys", key);
+}
+
+export async function saveIdentityKey({
+  key,
+  encryptedKey,
+  timestamp,
+}: {
+  key: string;
+  encryptedKey: string;
+  timestamp: number;
+}) {
+  await storageInstance.put("identityKeys", {
+    key: key,
+    encryptedKey,
+    timestamp
+  });
+}
+
+export async function getAllIdentityKeys() {
+  return storageInstance.getAll("identityKeys");
+}
+
+export async function getAllAccountKeys() {
+  return storageInstance.getAll("accountKeys");
+}
+
+export async function getShareSignKey({ key }: { key: string }) {
+  return storageInstance.get("shareSignKeys", key);
+}
+
+export async function saveShareSignKey({
+  key,
+  encryptedKey,
+  timestamp,
+}: {
+  key: string;
+  encryptedKey: string;
+  timestamp: number;
+}) {
+  await storageInstance.put("shareSignKeys", {
+    key: key,
+    encryptedKey,
+    timestamp
+  });
+}
+
+export async function getAllShareSignKeys() {
+  return storageInstance.getAll("shareSignKeys");
+}
+
+export async function getAllowKey({ key }: { key: string }) {
+  return storageInstance.get("allowKeys", key);
+}
+
+export async function saveAllowKey({
+  key,
+  userId,
+  timestamp,
+  latest,
+}: {
+  key: string;
+  userId: string;
+  timestamp: number;
+  latest: boolean;
+}) {
+  await storageInstance.put("allowKeys", {
+    key: key,
+    userId,
+    timestamp,
+    latest
+  });
+}
+
+export async function getAllAllowKeys() {
+  return storageInstance.getAll("allowKeys");
+}
+
+export async function getRoomKey({ key }: { key: string }) {
+  return storageInstance.get("RoomKeys", key);
+}
+
+export async function saveRoomKey({
+  key,
+  encryptedKey,
+  timestamp,
+  roomid,
+  metaData,
+}: {
+  key: string;
+  encryptedKey: string;
+  timestamp: number;
+  roomid: string;
+  metaData: string;
+}) {
+  await storageInstance.put("RoomKeys", {
+    key: key,
+    encryptedKey,
+    timestamp,
+    roomid,
+    metaData
+  });
+}
+
+export async function getAllRoomKeys() {
+  return storageInstance.getAll("RoomKeys");
+}
+
 export async function clearDB() {
-  const db = await createTakosDB();
-  db.clear("allowKeys");
-  db.clear("identityKeys");
-  db.clear("accountKeys");
-  db.clear("shareKeys");
-  db.clear("RoomKeys");
-  db.clear("shareSignKeys");
+  await storageInstance.clear("allowKeys");
+  await storageInstance.clear("identityKeys");
+  await storageInstance.clear("accountKeys");
+  await storageInstance.clear("shareKeys");
+  await storageInstance.clear("RoomKeys");
+  await storageInstance.clear("shareSignKeys");
 }

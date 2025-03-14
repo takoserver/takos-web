@@ -5,6 +5,7 @@ import {
   selectedTabState,
 } from "../../../utils/room/settingRoomState";
 import { selectedRoomState } from "../../../utils/room/roomState";
+import { TakosFetch } from "../../../utils/TakosFetch";
 
 export function GroupSettingInvite() {
   const [selected, setSelected] = useAtom(selectedTabState);
@@ -95,7 +96,7 @@ export function GroupSettingInvite() {
                           }
                           const friendUserName = match[1];
                           const domainFromRoom = match[2];
-                          const res = fetch("/api/v2/group/invite", {
+                          const res = TakosFetch("/api/v2/group/invite", {
                             method: "POST",
                             headers: {
                               "Content-Type": "application/json",

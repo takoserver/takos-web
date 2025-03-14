@@ -7,7 +7,8 @@ import {
 import { createSignal } from "solid-js";
 import { uuidv7 } from "uuidv7";
 import { generateDeviceKey } from "@takos/takos-encrypt-ink";
-import { clearDB, createTakosDB } from "../../utils/storage/idb";
+import { clearDB } from "../../utils/storage/idb";
+import { TakosFetch } from "../../utils/TakosFetch";
 
 export function Login() {
   const [open, setOpen] = createSignal(false);
@@ -45,7 +46,7 @@ export function Login() {
               class="bg-[#192320] text-white rounded-3xl py-2 px-4 hover:bg-[#192320] border w-full lg:mt-2 mt-3"
               onClick={async () => {
                 const sessionUUID = uuidv7();
-                const res = await fetch("/api/v2/sessions/login", {
+                const res = await TakosFetch("/api/v2/sessions/login", {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",

@@ -1,9 +1,9 @@
 import { useAtom } from "solid-jotai";
 import { createEffect, createSignal } from "solid-js";
 import { friendsState } from "../../../utils/state";
-import { createTakosDB } from "../../../utils/storage/idb";
 import { homeSelectedAtom } from "../home";
 import { TalkListFriend } from "./talkListConetent";
+import { getAllAllowKeys } from "../../../utils/storage/idb";
 
 export const [encrypted, setEncrypted] = createSignal<string[]>([]);
 export const [friendDetailId, setFriendDetailId] = createSignal<string | null>(
@@ -14,8 +14,7 @@ export function Friends() {
   const [friends] = useAtom(friendsState);
 
   createEffect(async () => {
-    const db = await createTakosDB();
-    const allowKeysData = await db.getAll("allowKeys");
+    const allowKeysData = await getAllAllowKeys();
     for (const allowKey of allowKeysData) {
       if (allowKey.latest === true) {
         setEncrypted((prev) => [...prev, allowKey.userId]);

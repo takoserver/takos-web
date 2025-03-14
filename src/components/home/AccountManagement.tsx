@@ -3,6 +3,7 @@ import { UAParser } from "ua-parser-js";
 import { clearDB } from "../../utils/storage/idb";
 import { useAtom } from "solid-jotai";
 import { homeSelectedAtom } from "./home";
+import { TakosFetch } from "../../utils/TakosFetch";
 
 export function AccountManagement() {
   const [selected, setSelected] = useAtom(homeSelectedAtom);
@@ -19,7 +20,7 @@ export function AccountManagement() {
   onMount(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/v2/sessions/list");
+      const response = await TakosFetch("/api/v2/sessions/list");
       const data = await response.json();
       console.log(data);
       setSessionInfo(
@@ -50,7 +51,7 @@ export function AccountManagement() {
       localStorage.removeItem("userName");
       localStorage.removeItem("masterKey");
       await clearDB();
-      await fetch("/api/v2/sessions/logout", { method: "POST" });
+      await TakosFetch("/api/v2/sessions/logout", { method: "POST" });
       alert("ログアウトしました。");
       window.location.href = "/";
     } catch (error) {
@@ -66,7 +67,7 @@ export function AccountManagement() {
   const handleTerminateSession = async (sessionId: string) => {
     try {
       if (confirm("このセッションを終了しますか？")) {
-        await fetch(`/api/v2/sessions/delete/${sessionId}`, { method: "POST" });
+        await TakosFetch(`/api/v2/sessions/delete/${sessionId}`, { method: "POST" });
         alert("セッションを終了しました。");
         window.location.reload();
       }

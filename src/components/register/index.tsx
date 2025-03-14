@@ -283,7 +283,7 @@ function SelectedServer() {
                         name={data.userName}
                         time={Date.now().toString()}
                         isPrimary={true}
-                        isFetch={true}
+                        isTakosFetch={true}
                       />
                     );
                   }

@@ -180,7 +180,7 @@ function MessageDisplay({ message }: { message: MessageData }) {
           }}
           messageid={message.messageid}
           isPrimary={true}
-          isFetch={true}
+          isTakosFetch={true}
         />
       );
     }

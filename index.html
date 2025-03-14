@@ -6,8 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>tako's</title>
     <script>
-      window.serverEndpoint = window.location.origin;
-      window.isApp = false;
+      if(window.location.origin.includes("localhost")) {
+        window.isApp = true;
+        window.serverEndpoint = localStorage.getItem("serverEndpoint") || "dev1.takos.jp";
+      } else {
+        window.serverEndpoint = window.location.hostname;
+      }
     </script>
   </head>
   <body>

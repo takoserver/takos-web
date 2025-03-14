@@ -3,9 +3,10 @@ import hash from "fnv1a";
 import { useAtom, useAtomValue } from "solid-jotai";
 import { createSignal, onMount } from "solid-js";
 import { deviceKeyState } from "../../../utils/state";
-import { createTakosDB } from "../../../utils/storage/idb";
 import { homeSelectedAtom } from "../home";
 import { friendDetailId, setEncrypted } from "./friend";
+import { TakosFetch } from "../../../utils/TakosFetch";
+import { saveAllowKey } from "../../../utils/storage/idb";
 
 export function FriendVerify() {
   const [selected, setSelected] = useAtom(homeSelectedAtom);
@@ -26,7 +27,7 @@ export function FriendVerify() {
     );
     if (!decryptedMasterKey) return;
 
-    const friendMasterKeyRes = await fetch(
+    const friendMasterKeyRes = await TakosFetch(
       `https://${
         friendId.split("@")[1]
       }/_takos/v1/key/masterKey?userId=${friendId}`,
@@ -39,10 +40,8 @@ export function FriendVerify() {
   const handleVerify = async () => {
     const friendId = friendDetailId();
     if (!friendId) return;
-
-    const db = await createTakosDB();
     const hashKey = await keyHash(keys()[1]);
-    await db.put("allowKeys", {
+    await saveAllowKey({
       userId: friendId,
       latest: true,
       key: hashKey,

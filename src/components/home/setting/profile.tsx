@@ -6,9 +6,8 @@ import {
   nicknameState,
 } from "../../../utils/state";
 import { homeSelectedAtom } from "../home";
-
-const userId = localStorage.getItem("userName") + "@" +
-  new URL(window.location.href).hostname;
+import { TakosFetch } from "../../../utils/TakosFetch";
+import { userId } from "../../../utils/userId";
 
 // プロフィール設定コンポーネント
 export function ProfileSettings() {
@@ -51,7 +50,7 @@ export function ProfileSettings() {
     const nickNameData = newNickName();
     const descriptionData = newDescription();
     if (iconData !== icon()) {
-      const iconRes = await fetch("/api/v2/profile/icon", {
+      const iconRes = await TakosFetch("/api/v2/profile/icon", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -63,7 +62,7 @@ export function ProfileSettings() {
       }
     }
     if (nickNameData !== nickName()) {
-      const nickNameRes = await fetch("/api/v2/profile/nickName", {
+      const nickNameRes = await TakosFetch("/api/v2/profile/nickName", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -75,7 +74,7 @@ export function ProfileSettings() {
       }
     }
     if (descriptionData !== description()) {
-      const descriptionRes = await fetch("/api/v2/profile/description", {
+      const descriptionRes = await TakosFetch("/api/v2/profile/description", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

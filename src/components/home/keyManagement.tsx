@@ -11,12 +11,15 @@ import { useAtom, useAtomValue, useSetAtom } from "solid-jotai";
 import { createEffect, createSignal } from "solid-js";
 import { deviceKeyState } from "../../utils/state";
 import {
-  createTakosDB,
   decryptShareSignKey,
   encryptAccountKey,
+  getAllAccountKeys,
+  getAllShareSignKeys,
+  saveAccountKey,
 } from "../../utils/storage/idb";
 import { showShareSignKeyPopUp } from "../encrypted/CreateIdentityKeyPopUp";
 import { homeSelectedAtom } from "./home";
+import { TakosFetch } from "../../utils/TakosFetch";
 
 export function KeyManagement() {
   const deviceKey = useAtomValue(deviceKeyState);
@@ -44,8 +47,7 @@ export function KeyManagement() {
       console.error("鍵の情報取得エラー:", error);
     }
     try {
-      const db = await createTakosDB();
-      const accountKeys = await db.getAll("accountKeys");
+      const accountKeys = await getAllAccountKeys();
 
       if (accountKeys && accountKeys.length > 0) {
         // タイムスタンプで降順ソート
@@ -101,7 +103,7 @@ export function KeyManagement() {
         userAgent: string;
         shareKey: string;
         shareKeySign: string;
-      }[] = await fetch("/api/v2/sessions/list").then((res) => res.json());
+      }[] = await TakosFetch("/api/v2/sessions/list").then((res) => res.json());
       if (!sessions) {
         alert("セッションの取得に失敗しました");
         return;
@@ -110,8 +112,7 @@ export function KeyManagement() {
         privateKey: newAccountKey.privateKey,
         publicKey: newAccountKey.publickKey,
       });
-      const db = await createTakosDB();
-      const latestShareSignKey = await db.getAll("shareSignKeys");
+      const latestShareSignKey = await getAllShareSignKeys();
       if (latestShareSignKey.length === 0) {
         setShowSHareSignKeyPopUp(true);
         return;
@@ -159,7 +160,7 @@ export function KeyManagement() {
           ]);
         }
       }
-      const res = await fetch("/api/v2/keys/accountKey", {
+      const res = await TakosFetch("/api/v2/keys/accountKey", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -187,7 +188,7 @@ export function KeyManagement() {
         alert("アカウント鍵の暗号化に失敗しました");
         return;
       }
-      await db.put("accountKeys", {
+      await saveAccountKey({
         key: await keyHash(newAccountKey.publickKey),
         encryptedKey: encryptedAccountKey,
         timestamp: JSON.parse(newAccountKey.publickKey).timestamp,

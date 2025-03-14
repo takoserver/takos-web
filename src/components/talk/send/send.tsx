@@ -39,10 +39,6 @@ import ImagePasteConfirmModal, {
   pasteImagePreviewAtom,
   showPasteConfirmAtom,
 } from "./ImagePasteConfirmModal.tsx";
-
-const userId = localStorage.getItem("userName") + "@" +
-  new URL(window.location.href).hostname;
-
 function ChatSend() {
   const [inputMessage, setInputMessage] = useAtom(inputMessageState);
   const [isValidInput, setIsValidInput] = useAtom(isValidInputState);

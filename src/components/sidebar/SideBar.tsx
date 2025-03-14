@@ -16,12 +16,13 @@ import {
   selectedRoomState,
 } from "../../utils/room/roomState";
 import { createEffect, createMemo, createSignal } from "solid-js";
-import { createTakosDB } from "../../utils/storage/idb";
 import { isLoadedMessageState } from "../talk/Content";
 import { Home } from "../home/home";
 import { createRoomSelector } from "../../utils/room/roomUtils";
-import { fetchEntityInfo } from "../../utils/chache/Icon.ts";
+import { TakosFetchEntityInfo } from "../../utils/chache/Icon.ts";
 import entityInfoCache from "../../utils/chache/Icon.ts";
+import { TakosFetch } from "../../utils/TakosFetch.ts";
+import { getAllAllowKeys } from "../../utils/storage/idb.ts";
 
 export function SideBer() {
   const [page] = useAtom(pageState);
@@ -36,7 +37,7 @@ export function SideBer() {
   );
 }
 
-export const fetchingUsersState = atom<
+export const TakosFetchingUsersState = atom<
   Map<
     string,
     Promise<{ icon: string; nickName: string; type: "friend" | "group" }>
@@ -69,7 +70,7 @@ function TalkListFriend({
 
     try {
       // 共有キャッシュを使用して情報を取得
-      const result = await fetchEntityInfo(
+      const result = await TakosFetchEntityInfo(
         friendUserId,
         domainFromRoom,
         "friend",
@@ -79,7 +80,7 @@ function TalkListFriend({
         setNickName(result.nickName);
       }
     } catch (error) {
-      console.error(`Error fetching user info: ${friendUserId}`, error);
+      console.error(`Error TakosFetching user info: ${friendUserId}`, error);
     }
   });
   const setRoomKeyState = useSetAtom(roomKeyState);
@@ -216,13 +217,13 @@ function TalkGroup({
 
     try {
       // 共有キャッシュを使用して情報を取得
-      const result = await fetchEntityInfo(groupId, domainFromRoom, "group");
+      const result = await TakosFetchEntityInfo(groupId, domainFromRoom, "group");
       if (result) {
         setIcon(result.icon);
         setNickName(result.nickName);
       }
     } catch (error) {
-      console.error(`Error fetching group info: ${groupId}`, error);
+      console.error(`Error TakosFetching group info: ${groupId}`, error);
     }
   });
   const setRoomKeyState = useSetAtom(roomKeyState);
@@ -283,16 +284,9 @@ const [encrypted, setEncrypted] = createSignal<string[]>([]);
 
 function TalkList() {
   const [talkList] = useAtom(talkListState);
-  const [domain] = useAtom(domainState);
-  const [nickNames, setNickNames] = createSignal<{ [key: string]: string }>({});
-  const [icons, setIcons] = createSignal<{ [key: string]: string }>({});
   const [selectedRoom, setSelectedRoom] = useAtom(selectedRoomState);
-  const [isSelectRoom, setIsSelectRoom] = useAtom(isSelectRoomState);
-  const [identityKeyAndAccountKey] = useAtom(IdentityKeyAndAccountKeyState);
-  const [deviceKey] = useAtom(deviceKeyState);
   createEffect(async () => {
-    const db = await createTakosDB();
-    const allowKeysData = await db.getAll("allowKeys");
+    const allowKeysData = await getAllAllowKeys();
     for (const allowKey of allowKeysData) {
       if (allowKey.latest === true) {
         setEncrypted((prev) => [...prev, allowKey.userId]);
@@ -378,7 +372,7 @@ function Notification() {
             <Request
               title="友達"
               acceptFnc={async () => {
-                const res = await fetch("/api/v2/friend/accept", {
+                const res = await TakosFetch("/api/v2/friend/accept", {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",
@@ -398,7 +392,7 @@ function Notification() {
             <Request
               title="グループ招待"
               acceptFnc={async () => {
-                const res = await fetch("/api/v2/group/accept", {
+                const res = await TakosFetch("/api/v2/group/accept", {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",

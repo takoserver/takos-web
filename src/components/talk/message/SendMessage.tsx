@@ -9,9 +9,8 @@ import { setReplyToMessage } from "../../../utils/message/mentionReply.ts";
 import { MessageContentType } from "../../../types/message.ts";
 import { ReplyMessagePreview } from "./ReplyMessagePreview.tsx";
 import MentionDisplay from "./MentionDisplay.tsx";
-
-const userId = localStorage.getItem("userName") + "@" +
-  new URL(window.location.href).hostname;
+import { TakosFetch } from "../../../utils/TakosFetch.ts";
+import { userId } from "../../../utils/userId.ts";
 
 // props型定義に reply と mention を追加
 export interface ChatSendMessageProps {
@@ -68,7 +67,7 @@ const ChatSendMessage = (props: ChatSendMessageProps) => {
   const deleteMessage = async () => {
     if (confirm("このメッセージを削除しますか？")) {
       try {
-        const res = await fetch("/api/v2/message/delete", {
+        const res = await TakosFetch("/api/v2/message/delete", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

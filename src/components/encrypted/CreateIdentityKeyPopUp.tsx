@@ -2,9 +2,12 @@ import { atom, useAtom } from "solid-jotai";
 import { PopUpFrame } from "./SetUpFrame";
 import { createEffect, createSignal } from "solid-js";
 import {
-  createTakosDB,
   encryptIdentityKey,
   encryptShareSignKey,
+  getAllIdentityKeys,
+  getAllShareSignKeys,
+  saveIdentityKey,
+  saveShareSignKey,
 } from "../../utils/storage/idb";
 import { deviceKeyState } from "../../utils/state";
 import {
@@ -16,6 +19,7 @@ import {
 } from "@takos/takos-encrypt-ink";
 
 import { FiCheckCircle, FiClock, FiKey, FiXCircle } from "solid-icons/fi";
+import { TakosFetch } from "../../utils/TakosFetch";
 
 export const shoowIdentityKeyPopUp = atom(false);
 
@@ -29,8 +33,7 @@ export function CreateIdentityKeyPopUp() {
   const [deviceKey] = useAtom(deviceKeyState);
 
   createEffect(async () => {
-    const db = await createTakosDB();
-    const identityKey = await db.getAll("identityKeys");
+    const identityKey = await getAllIdentityKeys();
     const latestIdentityKey = identityKey.sort((a, b) =>
       b.timestamp - a.timestamp
     )[0];
@@ -46,7 +49,6 @@ export function CreateIdentityKeyPopUp() {
   async function handleCreateIdentityKey() {
     setIsCreating(true);
     try {
-      const db = await createTakosDB();
       const encryptedMasterKey = localStorage.getItem("masterKey");
       const sessionUUID = localStorage.getItem("sessionUUID");
       if (!encryptedMasterKey || !sessionUUID) {
@@ -78,7 +80,7 @@ export function CreateIdentityKeyPopUp() {
         return;
       }
 
-      const res = await fetch("/api/v2/keys/identityKey", {
+      const res = await TakosFetch("/api/v2/keys/identityKey", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -102,12 +104,11 @@ export function CreateIdentityKeyPopUp() {
           sign: identityKey.sign,
         },
       });
-
-      await db.put("identityKeys", {
+     await saveIdentityKey({
         key: await keyHash(identityKey.publickKey),
         encryptedKey: encryptedIdentityKey,
-        timestamp: Date.now(),
-      });
+        timestamp: Date.now()
+     })
 
       setLastCreateIdentityKeyTime(new Date().toLocaleString());
       setShowIdentityKeyPopUp(false);
@@ -196,8 +197,7 @@ export function CreateShareSignKeyPopUp() {
   const [deviceKey] = useAtom(deviceKeyState);
 
   createEffect(async () => {
-    const db = await createTakosDB();
-    const signKeys = await db.getAll("shareSignKeys");
+    const signKeys = await getAllShareSignKeys();
     const latestKey = signKeys.sort((a, b) => b.timestamp - a.timestamp)[0];
 
     if (latestKey) {
@@ -234,7 +234,7 @@ export function CreateShareSignKeyPopUp() {
       alert("ShareSignKeyの生成に失敗しました");
       return;
     }
-    const res = await fetch("/api/v2/keys/shareSignKey", {
+    const res = await TakosFetch("/api/v2/keys/shareSignKey", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -248,7 +248,6 @@ export function CreateShareSignKeyPopUp() {
       alert("サーバーへの登録に失敗しました");
       return;
     }
-    const db = await createTakosDB();
     const encryptedShareSignKey = await encryptShareSignKey({
       deviceKey: deviceKeyVal,
       shareSignKey: {
@@ -257,11 +256,11 @@ export function CreateShareSignKeyPopUp() {
         sign: shareSignKey.sign,
       },
     });
-    await db.put("shareSignKeys", {
+    await saveShareSignKey({
       key: await keyHash(shareSignKey.publickKey),
       encryptedKey: encryptedShareSignKey,
-      timestamp: Date.now(),
-    });
+      timestamp: Date.now()
+    })
     setLastCreateTime(new Date().toLocaleString());
     setShowPopUp(false);
     alert("ShareSignKeyを作成しました");

@@ -14,6 +14,7 @@ import { selectedRoomState } from "../../../utils/room/roomState";
 import { groupChannelState } from "../../sidebar/SideBar";
 import { For } from "solid-js";
 import { PopUpFrame } from "../../utils/popUpFrame";
+import { TakosFetch } from "../../../utils/TakosFetch";
 
 export function GroupSettingMember() {
   const [selected, setSelected] = useAtom(selectedTabState);
@@ -309,7 +310,7 @@ export function GroupSettingMember() {
                         const friendUserName = match[1];
                         const domainFromRoom = match[2];
 
-                        fetch("/api/v2/group/user/role", {
+                        TakosFetch("/api/v2/group/user/role", {
                           method: "POST",
                           headers: {
                             "Content-Type": "application/json",
@@ -328,7 +329,7 @@ export function GroupSettingMember() {
 
                           const baseUrl =
                             `https://${domainFromRoom}/_takos/v1/group`;
-                          const role = await fetch(
+                          const role = await TakosFetch(
                             `${baseUrl}/members/${
                               friendUserName + "@" + domainFromRoom
                             }`,
@@ -447,7 +448,7 @@ export function GroupSettingMember() {
                           if (!match) return;
 
                           try {
-                            const res = await fetch(
+                            const res = await TakosFetch(
                               "/api/v2/group/kick",
                               {
                                 method: "POST",
@@ -468,7 +469,7 @@ export function GroupSettingMember() {
                               const baseUrl =
                                 `https://${domainFromRoom}/_takos/v1/group`;
 
-                              const members = await fetch(
+                              const members = await TakosFetch(
                                 `${baseUrl}/members/${
                                   friendUserName + "@" +
                                   domainFromRoom
@@ -534,7 +535,7 @@ export function GroupSettingMember() {
                           if (!match) return;
 
                           try {
-                            const res = await fetch(
+                            const res = await TakosFetch(
                               "/api/v2/group/ban",
                               {
                                 method: "POST",
@@ -555,7 +556,7 @@ export function GroupSettingMember() {
                               const baseUrl =
                                 `https://${domainFromRoom}/_takos/v1/group`;
 
-                              const members = await fetch(
+                              const members = await TakosFetch(
                                 `${baseUrl}/members/${
                                   friendUserName + "@" +
                                   domainFromRoom
@@ -652,7 +653,7 @@ export function GroupSettingMember() {
                           if (!match) return;
 
                           try {
-                            const res = await fetch(
+                            const res = await TakosFetch(
                               "/api/v2/group/timeout",
                               {
                                 method: "POST",

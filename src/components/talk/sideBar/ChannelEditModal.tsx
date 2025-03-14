@@ -3,6 +3,7 @@ import { PopUpFrame } from "../../utils/popUpFrame";
 import { useAtom } from "solid-jotai";
 import { groupChannelState } from "../../sidebar/SideBar";
 import { selectedRoomState } from "../../../utils/room/roomState";
+import { TakosFetch } from "../../../utils/TakosFetch";
 
 export function ChannelEditModal(props: {
   channel: string;
@@ -47,7 +48,7 @@ export function ChannelEditModal(props: {
     if (!much) return console.error("Invalid roomid");
     const groupId = much[1] + "@" + much[2];
     if (props.type === "channel") {
-      const res = await fetch("/api/v2/group/channel/add", {
+      const res = await TakosFetch("/api/v2/group/channel/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -66,7 +67,7 @@ export function ChannelEditModal(props: {
       }
       alert("チャンネルを編集しました");
     } else {
-      const res = await fetch("/api/v2/group/category/add", {
+      const res = await TakosFetch("/api/v2/group/category/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,6 +1,7 @@
 import { useAtom } from "solid-jotai";
 import { createSignal } from "solid-js";
 import { homeSelectedAtom } from "./home";
+import { TakosFetch } from "../../utils/TakosFetch";
 
 export function AddUserUI() {
   const [selected, setSelected] = useAtom(homeSelectedAtom);
@@ -35,11 +36,11 @@ export function AddUserUI() {
     try {
       // ユーザー検索リクエスト
       const domain = id.split("@")[1];
-      const icon = await fetch(`https://${domain}/_takos/v1/user/icon/${id}`);
-      const nickName = await fetch(
+      const icon = await TakosFetch(`https://${domain}/_takos/v1/user/icon/${id}`);
+      const nickName = await TakosFetch(
         `https://${domain}/_takos/v1/user/nickName/${id}`,
       );
-      const discription = await fetch(
+      const discription = await TakosFetch(
         `https://${domain}/_takos/v1/user/description/${id}`,
       );
       if (!icon.ok) {
@@ -64,7 +65,7 @@ export function AddUserUI() {
     if (!searchResult()) return;
 
     try {
-      const res = await fetch("/api/v2/friend/request", {
+      const res = await TakosFetch("/api/v2/friend/request", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

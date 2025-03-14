@@ -7,7 +7,8 @@ import {
   keyHash,
   verifyMasterKey,
 } from "@takos/takos-encrypt-ink";
-import { createTakosDB } from "../storage/idb";
+import { TakosFetch } from "../TakosFetch";
+import { getAllAccountKeys, getAllAllowKeys, saveAllowKey, saveRoomKey } from "../storage/idb";
 
 export async function createRoomKey(
   roomId: string,
@@ -32,18 +33,14 @@ export async function createRoomKey(
       console.error("ルームキーの生成に失敗しました");
       return undefined;
     }
-
-    // データベース接続
-    const db = await createTakosDB();
-
     // 自分のIDを友達リストから除外
     const targetFriendIds = friendIds.filter((id) => id !== userId);
 
     // 友達のキー情報を収集
-    const friendKeys = await collectFriendKeys(targetFriendIds, db);
+    const friendKeys = await collectFriendKeys(targetFriendIds);
 
     // 自分のキー情報を取得
-    const myKeyInfo = await getMyKeyInfo(userId, deviceKey, db);
+    const myKeyInfo = await getMyKeyInfo(userId, deviceKey);
     if (!myKeyInfo) {
       console.error("自分のキー情報の取得に失敗しました");
       return undefined;
@@ -72,7 +69,7 @@ export async function createRoomKey(
     }
 
     // ルームキーをデバイスキーで暗号化して保存
-    await storeRoomKey(db, roomId, roomKey, deviceKey, encrypted.metadata);
+    await storeRoomKey(roomId, roomKey, deviceKey, encrypted.metadata);
     return roomKey;
   } catch (error) {
     console.error("ルームキー作成中にエラーが発生しました:", error);
@@ -85,7 +82,6 @@ export async function createRoomKey(
  */
 async function collectFriendKeys(
   friendIds: string[],
-  db: any,
 ): Promise<
   Array<{
     masterKey: string;
@@ -96,7 +92,7 @@ async function collectFriendKeys(
   }>
 > {
   console.log(friendIds);
-  const allowKeysData = await db.getAll("allowKeys");
+  const allowKeysData = await getAllAllowKeys();
   const friendKeys = [];
 
   for (const friendId of friendIds) {
@@ -109,8 +105,8 @@ async function collectFriendKeys(
 
       // 友達のマスターキーとアカウントキーを取得
       const [friendMasterKeyRes, friendAccountKeyRes] = await Promise.all([
-        fetch(`https://${domain}/_takos/v1/key/masterKey?userId=${friendId}`),
-        fetch(`https://${domain}/_takos/v1/key/accountKey?userId=${friendId}`),
+        TakosFetch(`https://${domain}/_takos/v1/key/masterKey?userId=${friendId}`),
+        TakosFetch(`https://${domain}/_takos/v1/key/accountKey?userId=${friendId}`),
       ]);
 
       if (
@@ -129,7 +125,7 @@ async function collectFriendKeys(
         k: { userId: string; latest: any },
       ) => k.userId === friendId && k.latest);
       if (allowKey && allowKey.key !== await keyHash(friendMasterKey)) {
-        await db.put("allowKeys", {
+        await saveAllowKey({
           key: allowKey.key,
           userId: allowKey.userId,
           timestamp: allowKey.timestamp,
@@ -177,7 +173,6 @@ async function collectFriendKeys(
 async function getMyKeyInfo(
   userId: string,
   deviceKey: string,
-  db: any,
 ): Promise<
   {
     masterKey: string;
@@ -202,7 +197,7 @@ async function getMyKeyInfo(
   }
 
   // 最新のアカウントキーを取得
-  const accountKeys = await db.getAll("accountKeys");
+  const accountKeys = await getAllAccountKeys();
   const encryptedAccountKey =
     accountKeys.sort((a: { timestamp: number }, b: { timestamp: number }) =>
       b.timestamp - a.timestamp
@@ -213,7 +208,7 @@ async function getMyKeyInfo(
   }
 
   // アカウントキーの署名を取得
-  const accountKeyRes = await fetch(
+  const accountKeyRes = await TakosFetch(
     `/_takos/v1/key/accountKey?userId=${userId}`,
   );
   if (accountKeyRes.status !== 200) {
@@ -222,7 +217,8 @@ async function getMyKeyInfo(
   }
 
   const accountKeyData = await accountKeyRes.json();
-
+  console.log(encryptedAccountKey.key);
+  console.log(await keyHash(accountKeyData.key));
   // キーハッシュの検証
   if (await keyHash(accountKeyData.key) !== encryptedAccountKey.key) {
     console.error("アカウントキーのハッシュが一致しません");
@@ -261,7 +257,7 @@ async function sendRoomKey(
   roomKey: string,
   roomType: "friend" | "group",
 ): Promise<boolean> {
-  const res = await fetch("/api/v2/keys/roomKey", {
+  const res = await TakosFetch("/api/v2/keys/roomKey", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -282,7 +278,6 @@ async function sendRoomKey(
 }
 
 async function storeRoomKey(
-  db: any,
   roomId: string,
   roomKey: string,
   deviceKey: string,
@@ -292,7 +287,7 @@ async function storeRoomKey(
   if (!encryptedRoomKey) {
     throw new Error("ルームキーの暗号化に失敗しました");
   }
-  await db.put("RoomKeys", {
+  await saveRoomKey({
     key: await keyHash(roomKey),
     encryptedKey: encryptedRoomKey,
     timestamp: new Date().getTime(),

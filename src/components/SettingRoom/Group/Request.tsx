@@ -7,6 +7,7 @@ import {
 } from "../../../utils/room/settingRoomState";
 import { groupChannelState } from "../../sidebar/SideBar";
 import { For } from "solid-js";
+import { TakosFetch } from "../../../utils/TakosFetch";
 
 export function GroupSettingRequest() {
   const [selectedRoom] = useAtom(selectedRoomState);
@@ -60,7 +61,7 @@ export function GroupSettingRequest() {
                   setIsLoadingRequests(true);
 
                   try {
-                    const res = await fetch(
+                    const res = await TakosFetch(
                       `https://${match[2]}/_takos/v1/group/requests/${
                         match[1] + "@" + match[2]
                       }`,
@@ -142,7 +143,7 @@ export function GroupSettingRequest() {
                                 if (!match) return;
 
                                 try {
-                                  const res = await fetch(
+                                  const res = await TakosFetch(
                                     "./api/v2/group/join/accept",
                                     {
                                       method: "POST",
@@ -169,7 +170,7 @@ export function GroupSettingRequest() {
                                     const baseUrl =
                                       `https://${domainFromRoom}/_takos/v1/group`;
 
-                                    const members = await fetch(
+                                    const members = await TakosFetch(
                                       `${baseUrl}/members/${
                                         friendUserName + "@" +
                                         domainFromRoom
@@ -221,7 +222,7 @@ export function GroupSettingRequest() {
                                 if (!match) return;
 
                                 try {
-                                  const res = await fetch(
+                                  const res = await TakosFetch(
                                     "/_takos/v1/group/requests/reject",
                                     {
                                       method: "POST",

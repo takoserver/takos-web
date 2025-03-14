@@ -1,6 +1,6 @@
 import { useAtom } from "solid-jotai";
 import { createRoot } from "solid-js";
-import { createTakosDB, decryptIdentityKey } from "../storage/idb";
+import { decryptIdentityKey, getAllIdentityKeys } from "../storage/idb";
 import { shoowIdentityKeyPopUp } from "../../components/encrypted/CreateIdentityKeyPopUp";
 
 export async function getIdentityKeys(deviceKeyVal: string) {
@@ -8,8 +8,7 @@ export async function getIdentityKeys(deviceKeyVal: string) {
     const [showIdentityKeyPopUp, setShowIdentityKeyPopUp] = useAtom(
       shoowIdentityKeyPopUp,
     );
-    const db = await createTakosDB();
-    const identityKeys = await db.getAll("identityKeys");
+    const identityKeys = await getAllIdentityKeys();
     const latestIdentityKey = identityKeys.sort((a, b) =>
       b.timestamp - a.timestamp
     )[0];

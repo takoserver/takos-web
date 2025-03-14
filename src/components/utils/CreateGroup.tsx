@@ -1,6 +1,7 @@
 import { atom, useAtom } from "solid-jotai";
 import { createEffect, createSignal } from "solid-js";
 import { arrayBufferToBase64, base64ToArrayBuffer } from "../../utils/buffers";
+import { TakosFetch } from "../../utils/TakosFetch";
 
 export const shoowGroupPopUp = atom(false);
 export const showGroupfindPopUp = atom(false);
@@ -101,7 +102,7 @@ export function GroupFindPopUp() {
     try {
       const params = new URLSearchParams();
       params.append("query", searchQuery());
-      const res = await fetch(
+      const res = await TakosFetch(
         `https://${selectedServer()}/_takos/v1/group/search?${params.toString()}`,
         {
           method: "GET",
@@ -234,7 +235,7 @@ export function GroupFindPopUp() {
                               <button
                                 onClick={async () => {
                                   if (group.allowJoin) {
-                                    const res = await fetch(
+                                    const res = await TakosFetch(
                                       `./api/v2/group/join`,
                                       {
                                         method: "POST",
@@ -252,7 +253,7 @@ export function GroupFindPopUp() {
                                     }
                                     alert("グループに参加しました");
                                   } else {
-                                    const res = await fetch(
+                                    const res = await TakosFetch(
                                       `./api/v2/group/join/request`,
                                       {
                                         method: "POST",
@@ -406,7 +407,7 @@ export function CreateGroup() {
         return;
       }
       console.log(icon);
-      const res = await fetch("/api/v2/group/create", {
+      const res = await TakosFetch("/api/v2/group/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

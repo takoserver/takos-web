@@ -19,7 +19,7 @@ import { atom, useAtom, useSetAtom } from "solid-jotai";
 import { PopUpFrame } from "./SetUpFrame";
 import { createEffect, createSignal } from "solid-js";
 import fnv1a from "fnv1a";
-import { createTakosDB, encryptAccountKey } from "../../utils/storage/idb";
+import { encryptAccountKey, saveAccountKey } from "../../utils/storage/idb";
 import {
   decryptDataDeviceKey,
   encryptDataDeviceKey,
@@ -34,7 +34,7 @@ import {
   keyHash,
   signDataMigrateSignKey,
 } from "@takos/takos-encrypt-ink";
-import { uuidv7 } from "npm:uuidv7";
+import { TakosFetch } from "../../utils/TakosFetch";
 
 export function EncryptSession() {
   const [EncryptedSession, setEncryptedSession] = useAtom(
@@ -90,7 +90,7 @@ export function EncryptSession() {
                           const migrateKey = generateMigrateKey();
                           setMigrateKeyPrivate(migrateKey.privateKey);
                           setMigrateKeyPublic(migrateKey.publickKey);
-                          const res = await fetch(
+                          const res = await TakosFetch(
                             "/api/v2/sessions/encrypt/request",
                             {
                               method: "POST",
@@ -127,7 +127,7 @@ export function EncryptSession() {
                           );
 
                           if (!accountKey || !shareKey) return;
-                          const res = await fetch("/api/v2/sessions/reset", {
+                          const res = await TakosFetch("/api/v2/sessions/reset", {
                             method: "POST",
                             headers: {
                               "Content-Type": "application/json",
@@ -173,14 +173,13 @@ export function EncryptSession() {
                               "masterKey",
                               encryptedMasterKey,
                             );
-                            const db = await createTakosDB();
-                            await db.put("accountKeys", {
+                            await saveAccountKey({
                               key: await keyHash(accountKey.publickKey),
                               encryptedKey: encryptedAccountKey,
                               timestamp:
                                 JSON.parse(accountKey.publickKey).timestamp,
                             });
-                            await db.put("shareKeys", {
+                            await saveAccountKey({
                               key: await keyHash(shareKey.publickKey),
                               encryptedKey: encryptedShareKey,
                               timestamp:

@@ -1,6 +1,6 @@
 import { createEffect, createSignal, For, Show } from "solid-js";
 import { DEFAULT_ICON } from "../../utils/defaultIcon.ts";
-import { fetchMultipleEntityInfo } from "../../../utils/chache/Icon.ts";
+import { TakosFetchMultipleEntityInfo } from "../../../utils/chache/Icon.ts";
 import { atom, useAtom, useSetAtom } from "solid-jotai";
 
 export interface MentionDisplayProps {
@@ -32,7 +32,7 @@ const MentionDisplay = (props: MentionDisplayProps) => {
   createEffect(async () => {
     if (props.mentions && props.mentions.length > 0) {
       try {
-        const mentionMap = await fetchMultipleEntityInfo(props.mentions);
+        const mentionMap = await TakosFetchMultipleEntityInfo(props.mentions);
         console.log(mentionMap, props.mentions);
         // 配列に変換してset
         const array: { id: string; icon: string | null; nickName: string }[] =

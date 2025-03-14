@@ -1,4 +1,4 @@
-import { createTakosDB, decryptAccountKey } from "../storage/idb";
+import { decryptAccountKey, getAccountKey } from "../storage/idb";
 import { useAtom } from "solid-jotai";
 import { deviceKeyState } from "../state";
 import {
@@ -6,6 +6,7 @@ import {
   decryptDataDeviceKey,
   decryptDataRoomKey,
 } from "@takos/takos-encrypt-ink";
+import { TakosFetch } from "../TakosFetch";
 
 const userName = localStorage.getItem("userName") + "@" +
   new URL(window.location.href).hostname;
@@ -49,7 +50,7 @@ export async function getMessage({
   if (!isProgress && onProgress) {
     throw new Error("onProgress is only available when isProgress is true");
   }
-  // fetch APIの代わりにXMLHttpRequestを使用して進捗を追跡
+  // TakosFetch APIの代わりにXMLHttpRequestを使用して進捗を追跡
   let encryptedMessage;
 
   if (isProgress) {
@@ -61,13 +62,13 @@ export async function getMessage({
       );
 
       // ヘッダー取得用のフラグ
-      let headersFetched = false;
+      let headersTakosFetched = false;
 
       // readystatechangeイベントでヘッダーを取得
       xhr.onreadystatechange = () => {
         // readyStateが2（HEADERS_RECEIVED）以上になったらヘッダー取得可能
-        if (xhr.readyState >= 2 && !headersFetched) {
-          headersFetched = true;
+        if (xhr.readyState >= 2 && !headersTakosFetched) {
+          headersTakosFetched = true;
           const contentLength = xhr.getResponseHeader("Content-Length");
           console.log("Content-Length:", contentLength);
           // ここで必要に応じて取得したヘッダー情報を保存/処理できます
@@ -107,7 +108,7 @@ export async function getMessage({
       xhr.send();
     });
   } else {
-    const res = await fetch(
+    const res = await TakosFetch(
       `https://${messageid.split("@")[1]}/_takos/v1/message/${messageid}`,
       { cache: "force-cache" },
     );
@@ -139,7 +140,7 @@ export async function getMessage({
   if (!roomKey) {
     let encryptedRoomKeyRes;
     if (type === "group") {
-      encryptedRoomKeyRes = await fetch(
+      encryptedRoomKeyRes = await TakosFetch(
         `https://${
           messageid.split("@")[1]
         }/_takos/v1/key/roomKey?roomId=${roomId}&targetUserId=${userName}&hash=${
@@ -147,7 +148,7 @@ export async function getMessage({
         }&userId=${senderId}`,
       );
     } else if (type === "friend") {
-      encryptedRoomKeyRes = await fetch(
+      encryptedRoomKeyRes = await TakosFetch(
         `https://${
           messageid.split("@")[1]
         }/_takos/v1/key/roomKey?targetUserId=${userName}&hash=${
@@ -163,8 +164,7 @@ export async function getMessage({
     const encryptedRoomKey = (await encryptedRoomKeyRes.json()).roomKey;
     const accountKeyHash = JSON.parse(encryptedRoomKey).keyHash;
 
-    const db = await createTakosDB();
-    const accountKey = await db.get("accountKeys", accountKeyHash);
+    const accountKey = await getAccountKey(accountKeyHash);
     if (!accountKey) {
       throw new Error("AccountKey not found");
     }
@@ -184,13 +184,13 @@ export async function getMessage({
     );
 
     if (!roomKeyResult) {
+      
       throw new Error("Failed to decrypt roomKey");
     }
 
     roomKey = roomKeyResult;
     sessionStorage.setItem("roomKey-" + roomKeyHash, roomKey);
   }
-
   // roomKeyを使ってメッセージを復号
   const decryptedMessage = await decryptDataRoomKey(
     roomKey,
@@ -200,7 +200,7 @@ export async function getMessage({
   if (!decryptedMessage) {
     throw new Error("Failed to decrypt message");
   }
-
+  console.log("Decrypted message:", decryptedMessage);
   // 復号したメッセージをパース
   const decryptedContent = JSON.parse(decryptedMessage);
   return {

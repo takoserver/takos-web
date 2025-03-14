@@ -14,9 +14,11 @@
   "dependencies": {
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.14.7",
-    "@tauri-apps/api": "^2.0.0",
     "@takos/takos-encrypt-ink": "npm:@jsr/takos__takos-encrypt-ink@^6.0.2",
-    "browser-image-compression": "^2.0.2",
+    "@tauri-apps/api": "^2.0.0",
+    "@tauri-apps/plugin-http": "^2.4.0",
+    "@tauri-apps/plugin-store": "^2.2.0",
+    "@tauri-apps/plugin-websocket": "^2.3.0",
     "fnv1a": "^1.1.1",
     "idb": "^8.0.0",
     "jotai": "^2.10.1",
@@ -26,8 +28,7 @@
     "solid-transition-group": "^0.3.0",
     "ua-parser-js": "^2.0.2",
     "ui7": "^0.2.3",
-    "uuidv7": "^1.0.2",
-    "wasm-imagemagick": "^1.2.8"
+    "uuidv7": "^1.0.2"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.3.1",

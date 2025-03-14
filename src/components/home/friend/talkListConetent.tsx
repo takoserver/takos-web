@@ -3,7 +3,7 @@ import { createEffect, createSignal, onMount } from "solid-js";
 import { homeSelectedAtom } from "../home";
 import { encrypted, setFriendDetailId } from "./friend";
 import {
-  fetchEntityInfo,
+  TakosFetchEntityInfo,
   getCachedEntityInfo,
 } from "../../../utils/chache/Icon";
 
@@ -30,7 +30,7 @@ export function TalkListFriend({
       } else {
         // キャッシュがない場合は新たに取得
         const domain = friendId.split("@")[1];
-        const info = await fetchEntityInfo(friendId, domain, "friend");
+        const info = await TakosFetchEntityInfo(friendId, domain, "friend");
         setNickName(info.nickName);
         setIcon(info.icon);
       }

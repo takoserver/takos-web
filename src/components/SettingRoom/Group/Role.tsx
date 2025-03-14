@@ -16,6 +16,7 @@ import { groupChannelState } from "../../sidebar/SideBar.tsx";
 import { PopUpFrame } from "../../utils/popUpFrame.tsx";
 import { availablePermissions } from "./Group.tsx";
 import { uuidv7 } from "uuidv7";
+import { TakosFetch } from "../../../utils/TakosFetch.ts";
 
 export function GroupSettingRole() {
   const [selected, setSelected] = useAtom(selectedTabState);
@@ -300,7 +301,7 @@ export function GroupSettingRole() {
                       );
                       if (!match) return;
 
-                      const res = await fetch(
+                      const res = await TakosFetch(
                         "/api/v2/group/role/add",
                         {
                           method: "POST",
@@ -328,7 +329,7 @@ export function GroupSettingRole() {
                         `https://${domainFromRoom}/_takos/v1/group`;
 
                       setTimeout(async () => {
-                        const role = await fetch(
+                        const role = await TakosFetch(
                           `${baseUrl}/role/${
                             friendUserName + "@" + domainFromRoom
                           }`,
@@ -448,7 +449,7 @@ export function GroupSettingRole() {
                         permissions: rolePermissions(),
                         id: roleId(),
                       });
-                      await fetch("/api/v2/group/role/add", {
+                      await TakosFetch("/api/v2/group/role/add", {
                         method: "POST",
                         headers: {
                           "Content-Type": "application/json",
@@ -468,7 +469,7 @@ export function GroupSettingRole() {
                         `https://${domainFromRoom}/_takos/v1/group`;
 
                       setTimeout(async () => {
-                        const role = await fetch(
+                        const role = await TakosFetch(
                           `${baseUrl}/role/${
                             friendUserName + "@" + domainFromRoom
                           }`,
@@ -542,7 +543,7 @@ export function GroupSettingRole() {
                       if (!match) return;
 
                       try {
-                        const res = await fetch(
+                        const res = await TakosFetch(
                           "/api/v2/group/role/delete",
                           {
                             method: "POST",
@@ -569,7 +570,7 @@ export function GroupSettingRole() {
                           `https://${domainFromRoom}/_takos/v1/group`;
 
                         setTimeout(async () => {
-                          const role = await fetch(
+                          const role = await TakosFetch(
                             `${baseUrl}/role/${
                               friendUserName + "@" + domainFromRoom
                             }`,
