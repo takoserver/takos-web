@@ -4,7 +4,7 @@ import {
   convertTime,
   copyMessageContent,
 } from "../../../utils/message/messageUtils.tsx";
-import { renderMessageContent } from "./MessageContent.tsx";
+import { renderMessageContent, getSecurityStatus } from "./MessageContent.tsx";
 import { setReplyToMessage } from "../../../utils/message/mentionReply.ts";
 import { MessageContentType } from "../../../types/message.ts";
 import { ReplyMessagePreview } from "./ReplyMessagePreview.tsx";
@@ -85,7 +85,38 @@ const ChatSendMessage = (props: ChatSendMessageProps) => {
     }
   };
 
-  // メニュー項目の定義
+  // セキュリティステータス情報を取得
+  const getSecurityInfo = () => {
+    return getSecurityStatus(props.content.encrypted, props.content.verified);
+  };
+
+  // セキュリティ情報を表示する関数
+  const showSecurityInfo = () => {
+    const { encryptionStatus, verificationStatus } = getSecurityInfo();
+    
+    alert(`メッセージセキュリティ情報:
+${encryptionStatus.icon} ${encryptionStatus.text}
+${verificationStatus.icon} ${verificationStatus.text}`);
+  };
+
+  // セキュリティ情報をヘッダーとして表示
+  const securityHeader = () => {
+    const { encryptionStatus, verificationStatus } = getSecurityInfo();
+    return (
+      <div class="flex justify-between items-center w-full px-1" onClick={showSecurityInfo}>
+        <div class={`flex items-center ${encryptionStatus.class}`}>
+          <span class="mr-1">{encryptionStatus.icon}</span>
+          <span class="text-sm">{encryptionStatus.text}</span>
+        </div>
+        <div class={`flex items-center ${verificationStatus.class}`}>
+          <span class="mr-1">{verificationStatus.icon}</span>
+          <span class="text-sm">{verificationStatus.text}</span>
+        </div>
+      </div>
+    );
+  };
+
+  // メニュー項目の定義 (セキュリティ情報を削除)
   const menuItems = [
     { label: "メッセージをコピー", onClick: copyMessage },
     {
@@ -129,6 +160,7 @@ const ChatSendMessage = (props: ChatSendMessageProps) => {
           y={contextMenuPosition().y}
           items={menuItems}
           onClose={() => setShowContextMenu(false)}
+          header={securityHeader()}
         />
       )}
     </li>

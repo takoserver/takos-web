@@ -12,6 +12,7 @@ import {
   selectedTabState,
 } from "../../utils/room/settingRoomState";
 import { selectedRoomState } from "../../utils/room/roomState";
+import { isEncryptedAtom } from "../../utils/message/messageUtils";
 
 type SettingEncryptionProps = {
   type: "group" | "friend";
@@ -34,6 +35,7 @@ export function SettingEncryption(props: SettingEncryptionProps) {
   const [selectedRoom] = useAtom(selectedRoomState);
   const [isSaving, setIsSaving] = createSignal(false);
   const [saveStatus, setSaveStatus] = createSignal<'success' | 'error' | null>(null);
+  const [isEncrypted, setIsEncrypted] = useAtom(isEncryptedAtom);
 
   createEffect(() => {
     const roomId = selectedRoom()?.roomid;
@@ -73,6 +75,9 @@ export function SettingEncryption(props: SettingEncryptionProps) {
         roomId: roomId,
         isEncrypte: localIsEncrypted() || false
       });
+      
+      // グローバルな暗号化状態も更新
+      setIsEncrypted(localIsEncrypted() || false);
       
       // 現在の除外リストのユーザーを保存
       // まず既存のユーザーを削除する処理が必要ですが、簡略化のため省略

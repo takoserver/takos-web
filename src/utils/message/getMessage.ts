@@ -118,11 +118,9 @@ export async function getMessage({
   }
   const parsedMessage = JSON.parse(encryptedMessage.message);
 
-  // 以下、既存のコードと同様...
-  // 非暗号化メッセージの処理
   if (!parsedMessage.encrypted) {
     return {
-      verified: true,
+      verified: false,
       encrypted: false,
       value: parsedMessage.value,
       channel: parsedMessage.channel,

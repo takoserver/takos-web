@@ -1,23 +1,53 @@
-import { createSignal, onCleanup, onMount, Show } from "solid-js";
+import { createSignal, onCleanup, onMount, Show, createEffect, For, JSX } from "solid-js";
 import { Portal } from "solid-js/web";
 
-interface ContextMenuItem {
-  label: string;
+type MenuItem = {
+  label: string | JSX.Element | (() => JSX.Element);
   onClick: () => void;
   danger?: boolean;
-}
+};
 
-export function ContextMenu(props: {
+export interface ContextMenuProps {
   x: number;
   y: number;
-  items: ContextMenuItem[];
+  items: MenuItem[];
   onClose: () => void;
-}) {
+  header?: JSX.Element; // ヘッダーとして表示する要素を追加
+}
+
+export function ContextMenu(props: ContextMenuProps) {
   const [position, setPosition] = createSignal({
     x: props.x,
     y: props.y,
   });
   let menuRef: HTMLDivElement | undefined;
+
+  // ドキュメント上の任意の場所をクリックしたらメニューを閉じる
+  createEffect(() => {
+    const handleClick = () => props.onClose();
+    document.addEventListener("click", handleClick);
+    onCleanup(() => document.removeEventListener("click", handleClick));
+  });
+
+  // ESCキーでメニューを閉じる
+  createEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") props.onClose();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    onCleanup(() => document.removeEventListener("keydown", handleKeyDown));
+  });
+
+  // メニューの位置調整（画面外にはみ出さないように）
+  const adjustedPosition = () => {
+    const maxX = window.innerWidth - 200; // メニューの想定最大幅
+    const maxY = window.innerHeight - props.items.length * 40; // メニューの想定最大高さ
+    
+    return {
+      x: Math.min(props.x, maxX),
+      y: Math.min(props.y, maxY)
+    };
+  };
 
   // マウント時にメニューサイズに基づいて位置調整
   onMount(() => {
@@ -83,20 +113,31 @@ export function ContextMenu(props: {
         }}
       >
         <div class="bg-gray-800 text-white rounded-lg shadow-lg p-2 min-w-[150px]">
+          {/* ヘッダーセクションを追加 */}
+          <Show when={props.header}>
+            <div class="border-b border-gray-700 pb-2 mb-2">
+              {props.header}
+            </div>
+          </Show>
+          
           <ul class="whitespace-nowrap">
-            {props.items.map((item) => (
-              <li
-                class={`cursor-pointer p-2 hover:${
-                  item.danger ? "bg-red-700" : "bg-gray-700"
-                } rounded transition-colors duration-200`}
-                onClick={() => {
-                  item.onClick();
-                  props.onClose();
-                }}
-              >
-                {item.label}
-              </li>
-            ))}
+            <For each={props.items}>
+              {(item) => (
+                <li
+                  class={`cursor-pointer p-2 hover:${
+                    item.danger ? "bg-red-700" : "bg-gray-700"
+                  } rounded transition-colors duration-200`}
+                  onClick={() => {
+                    item.onClick();
+                    props.onClose();
+                  }}
+                >
+                  {typeof item.label === "function" 
+                    ? item.label() 
+                    : item.label}
+                </li>
+              )}
+            </For>
           </ul>
         </div>
       </div>

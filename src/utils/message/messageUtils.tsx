@@ -14,6 +14,7 @@ import {
   mentionListState,
   replyTargetState,
 } from "./mentionReply";
+import { getEncryptSetting } from "../storage/idb";
 
 const userId = localStorage.getItem("userName") + "@" +
   new URL(window.location.href).hostname;
@@ -25,6 +26,18 @@ export const currentOperationAtom = atom("");
 export const isEncryptedAtom = atom(true);
 export const isMenuOpenAtom = atom(false);
 export const menuPositionAtom = atom("left");
+
+// 選択された部屋の暗号化設定を読み込む関数
+export const loadEncryptionSetting = async (roomId: string) => {
+  if (!roomId) return;
+  try {
+    const isEncrypted = await getEncryptSetting({ roomId });
+    return isEncrypted;
+  } catch (error) {
+    console.error("暗号化設定の読み込みに失敗しました:", error);
+    return true; // デフォルトでは暗号化を有効にする
+  }
+};
 
 // Utility for reading files as base64
 export const readFileAsBase64 = (
@@ -206,6 +219,37 @@ export const sendEncryptedMessage = async (
       sign,
       type,
       channelId,
+      isEncrypted: true,
+    }),
+  });
+  if (res.status == 200) {
+    const body = await res.json();
+    return { status: true, messageId: body.messageId };
+  } else {
+    return { status: false };
+  }
+};
+
+// 非暗号化メッセージを送信する関数
+export const sendUnencryptedMessage = async (
+  { roomId, message, type, channelId }: {
+    roomId: string;
+    message: any;
+    type: string;
+    channelId: string;
+  },
+) => {
+  const res = await fetch("/api/v2/message/send", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      roomId,
+      message,
+      type,
+      channelId,
+      isEncrypted: false,
     }),
   });
   if (res.status == 200) {
@@ -237,6 +281,7 @@ export const sendHandler = async ({
     const [currentOperation, setCurrentOperation] = useAtom(
       currentOperationAtom,
     );
+    const [isEncrypted] = useAtom(isEncryptedAtom);
     // メンションとリプライ状態を取得
     const [mentionList] = useAtom(mentionListState);
     const [replyTarget] = useAtom(replyTargetState);
@@ -249,6 +294,65 @@ export const sendHandler = async ({
 
       const room = selectedRoom();
       if (!room?.roomid) return;
+      
+      const channel = room.type === "friend" ? "friend" : selectedChannel();
+      if (!channel) {
+        setIsSending(false);
+        return;
+      }
+
+      const processedOriginal = original ? original : undefined;
+      
+      // メンションリストを処理
+      const mention = mentionList().length > 0 ? mentionList() : [];
+      
+      // リプライ情報を処理
+      const processedReply = replyTarget() ? { id: replyTarget()!.id } : undefined;
+
+      // 非暗号化メッセージ送信処理
+      if (!isEncrypted()) {
+        setCurrentOperation("メッセージを送信中...");
+        setSendingProgress(50);
+
+        // 非暗号化メッセージの構築
+        const unencryptedMessage = {
+          encrypted: false,
+          value: {
+            type,
+            content,
+            reply: processedReply,
+            mention,
+          },
+          channel,
+          original: processedOriginal,
+          timestamp: new Date().getTime(),
+          isLarge,
+        };
+
+        // 非暗号化メッセージを送信
+        const success = await sendUnencryptedMessage({
+          roomId: room.roomid,
+          message: JSON.stringify(unencryptedMessage),
+          type: room.type,
+          channelId: channel,
+        });
+
+        // 送信処理完了時に状態をリセット
+        setIsSending(false);
+        setSendingProgress(0);
+
+        if (success && success.status) {
+          setInputMessage("");
+          // メッセージ送信成功時にメンションとリプライ状態をリセット
+          clearMentionReplyState();
+          return success.messageId;
+        } else {
+          console.error("メッセージ送信に失敗しました");
+          return;
+        }
+      }
+
+      // 以下は暗号化メッセージ送信処理（既存コード）
       const deviceKeyVal = deviceKey();
       if (!deviceKeyVal) return;
       setCurrentOperation("暗号化キーを確認中...");
@@ -270,20 +374,6 @@ export const sendHandler = async ({
         return;
       }
 
-      const channel = room.type === "friend" ? "friend" : selectedChannel();
-      if (!channel) {
-        setIsSending(false);
-        return;
-      }
-
-      const processedOriginal = original ? original : undefined;
-      
-      // メンションリストを処理
-      const mention = mentionList().length > 0 ? mentionList() : undefined;
-      
-      // リプライ情報を処理
-      const processedReply = replyTarget() ? { id: replyTarget()!.id } : undefined;
-
       setCurrentOperation("メッセージを暗号化中...");
       setSendingProgress(50);
 
@@ -294,7 +384,7 @@ export const sendHandler = async ({
           channel,
           timestamp: new Date().getTime(),
           isLarge,
-          mention: mention ? mention : [],
+          mention,
           reply: processedReply,
           original: processedOriginal,
         },

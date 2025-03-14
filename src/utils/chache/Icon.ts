@@ -1,4 +1,5 @@
 // ユーザー/グループ情報をキャッシュするグローバルMap
+import { DEFAULT_ICON } from "../../components/utils/defaultIcon";
 const entityInfoCache = new Map<
   string,
   Promise<{ icon: string; nickName: string; type: "friend" | "group" }>
@@ -70,10 +71,18 @@ export async function fetchMultipleEntityInfo(ids: string[]): Promise<Map<string
   
   // グループ化して並列処理
   const promises = uniqueIds.map(async id => {
+    if(id === "everyone") {
+      resultMap.set(id, {
+        icon: DEFAULT_ICON,
+        nickName: "everyone",
+        type: "friend"
+      });
+    } else {
     const domain = id.split('@')[1];
     const type = id.includes('group@') ? 'group' : 'friend';
     const info = await fetchEntityInfo(id, domain, type);
     resultMap.set(id, info);
+    }
   });
   
   await Promise.all(promises);
