@@ -1,4 +1,4 @@
-import ChatOtherMessage from "../talk/message/OtherMessage.tsx";
+import ChatOtherMessage from "./RegisterOtherMessage.tsx";
 import {
   defaultServerState,
   exproleServerState,
@@ -9,6 +9,7 @@ import { useAtom } from "solid-jotai";
 import { Loading } from "../load.tsx";
 import { Register as RegisterComponent } from "./Register.tsx";
 import { Login as LoginComponent } from "./Login.tsx";
+import { DEFAULT_ICON } from "../utils/defaultIcon.ts";
 const sampleChatData = {
   roomName: "たこたこチャット",
   talkData: [
@@ -140,11 +141,23 @@ export function Register() {
     </>
   );
 }
-
 function SelectedServer() {
   return (
     <>
       <>
+      <div style={{
+          "background-image": `url("https://${window.serverEndpoint}/api/v2/server/background")`,
+          "background-size": "cover",
+          "background-position": "center",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: "100%",
+          height: "100%",
+          "z-index": -1
+      }}></div>
         <div class="flex w-full h-screen mb-6">
           <div class="lg:w-2/3 w-full m-5 lg:m-0">
             <div class="bg-white text-black rounded-lg shadow-[0_12px_32px_#00000040] p-6 max-w-[472px] lg:ml-[100px] mt-[80px] mx-auto">
@@ -152,7 +165,7 @@ function SelectedServer() {
                 <div class="w-full">
                   <div class="flex items-center mb-4">
                     <img
-                      src="/api/v2/server/icon"
+                      src={`https://${window.serverEndpoint}/api/v2/server/icon`}
                       alt="logo"
                       class="w-20 h-20 rounded-lg shadow-md"
                     />
@@ -279,11 +292,9 @@ function SelectedServer() {
                           type: "text",
                           timestamp: Date.now().toString(),
                         }}
-                        messageid={"a"}
-                        name={data.userName}
-                        time={Date.now().toString()}
-                        isPrimary={true}
-                        isTakosFetch={true}
+                        icon={DEFAULT_ICON}
+                        nickName={data.userName}
+                        time={Date.now()}
                       />
                     );
                   }

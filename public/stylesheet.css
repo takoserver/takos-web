@@ -72,7 +72,6 @@
 
 html, body {
   position: relative;
-  background-image: url("/api/v2/server/background");
   background-size: cover;
 }
 
@@ -587,7 +586,6 @@ input {
   margin-top: 10px;
 }
 .c-talk-chat.other, .c-talk-chat-msg {
-  background-color: #ffffff;
   color: #000000;
 }
 .c-talk-chat.self, .c-talk-chat-msg {

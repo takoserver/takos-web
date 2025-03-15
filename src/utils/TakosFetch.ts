@@ -45,6 +45,7 @@ export async function TakosFetch(
     if (cookies) {
         console.log('set-cookie', cookies);
         await store.set('cookie', cookies);
+        await store.save();
     }
     // レスポンスをクローンして返す（ストリームの二重消費を防ぐ）
     return response.clone();

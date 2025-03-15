@@ -1,12 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/*
-html {
-  background-image: url("/api/v2/server/background");
-  background-size: cover;
-}
-*/
 .p-talk-list-rooms__ul {
   -ms-overflow-style: none;
   scrollbar-width: none;

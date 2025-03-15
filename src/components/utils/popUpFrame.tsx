@@ -22,7 +22,7 @@ export function PopUpFrame(props: PopUpFrameProps) {
 
   return (
     <div
-      class="fixed inset-0 flex items-center justify-center bg-[rgba(0,0,0,0.5)] p-4 animate-fadeIn z-[9999999999999999999999999]"
+      class="fixed inset-0 flex items-center justify-center bg-[rgba(0,0,0,0.5)] animate-fadeIn z-[9999999999999999999999999]"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           props.closeScript(false);
@@ -30,7 +30,7 @@ export function PopUpFrame(props: PopUpFrameProps) {
       }}
     >
       <div
-        class="bg-[#242424] rounded-lg shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col"
+        class="bg-[#242424] rounded-lg shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col p-4 m-2"
         style={{
           "position": "relative",
           "z-index": "10001",
