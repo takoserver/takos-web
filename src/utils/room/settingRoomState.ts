@@ -1,5 +1,4 @@
 import { atom } from "solid-jotai";
-import { uuidv7 } from "npm:uuidv7";
 
 // 選択中のタブ/セクション
 export const selectedTabState = atom<false | string>(false);

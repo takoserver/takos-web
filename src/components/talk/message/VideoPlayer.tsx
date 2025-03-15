@@ -260,12 +260,10 @@ export const DirectVideoPlayer = ({
   videoUrl,
   videoType,
   filename,
-  senderName,
 }: {
   videoUrl: string;
   videoType: string;
   filename: string;
-  senderName: string;
 }) => {
   const [, setVideoPlayer] = useAtom(videoPlayerState);
   const [aspectRatio, setAspectRatio] = createSignal(0);

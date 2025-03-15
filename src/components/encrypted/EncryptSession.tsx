@@ -19,7 +19,7 @@ import { atom, useAtom, useSetAtom } from "solid-jotai";
 import { PopUpFrame } from "./SetUpFrame";
 import { createEffect, createSignal } from "solid-js";
 import fnv1a from "fnv1a";
-import { encryptAccountKey, saveAccountKey } from "../../utils/storage/idb";
+import { encryptAccountKey, saveAccountKey, saveShareKey } from "../../utils/storage/idb";
 import {
   decryptDataDeviceKey,
   encryptDataDeviceKey,
@@ -150,6 +150,7 @@ export function EncryptSession() {
                                 deviceKeyS,
                                 JSON.stringify(masterKey),
                               );
+
                             const encryptedAccountKey = await encryptAccountKey(
                               {
                                 deviceKey: deviceKeyS,
@@ -160,6 +161,8 @@ export function EncryptSession() {
                                 },
                               },
                             );
+                            console.log(deviceKeyS)
+                            console.log(encryptedAccountKey)
                             const encryptedShareKey =
                               await encryptDataDeviceKey(
                                 deviceKeyS,
@@ -179,7 +182,7 @@ export function EncryptSession() {
                               timestamp:
                                 JSON.parse(accountKey.publickKey).timestamp,
                             });
-                            await saveAccountKey({
+                            await saveShareKey({
                               key: await keyHash(shareKey.publickKey),
                               encryptedKey: encryptedShareKey,
                               timestamp:

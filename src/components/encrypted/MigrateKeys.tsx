@@ -115,15 +115,18 @@ export function MigrateKey() {
                 if (fnv1a(migratekey + migrateSignKey) !== Number(value())) {
                   alert("入力された数字が正しくありません。");
                 }
+                console.log("1")
                 const deviceKeyS = deviceKey();
                 if (!deviceKeyS) return "";
                 const encryptedAccountKyes = await getAllAccountKeys();
                 const accountKeys = [];
+                console.log("2")
                 for (const accountKey of encryptedAccountKyes) {
                   const decryptedAccountKey = await decryptDataDeviceKey(
                     deviceKeyS,
                     accountKey.encryptedKey,
                   );
+                  console.log("3")
                   if (!decryptedAccountKey) return "";
                   accountKeys.push({
                     key: accountKey.key,
@@ -167,6 +170,7 @@ export function MigrateKey() {
                 if (res.status !== 200) {
                   alert("エラーが発生しました。");
                 }
+                console.log("4")
                 setMigrateRequestInput(false);
                 setMigrateSessioonId("");
                 setMigrateKeyPublic("");

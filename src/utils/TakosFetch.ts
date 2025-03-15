@@ -1,10 +1,16 @@
 import { fetch as TauriFetch } from '@tauri-apps/plugin-http';
 import { load } from '@tauri-apps/plugin-store';
-let store: any
+let store: any;
 
-if(window.isApp === true) {
+// 初期化関数の定義
+async function initStore() {
+  if(window.isApp === true) {
     store = await load('cookie.json', { autoSave: false });
+  }
 }
+
+// 初期化を開始（await なしで）
+const storeInitPromise = initStore();
 
 declare global {
   interface Window {
@@ -17,6 +23,8 @@ export async function TakosFetch(
   init?: RequestInit,
 ): Promise<Response> {
   if (window.isApp === true) {
+    // store の初期化が完了するのを待つ
+    await storeInitPromise;
     const cookie = await store.get('cookie');
     // クッキーをリクエストヘッダーに追加
     const headers = init?.headers ? new Headers(init.headers) : new Headers();
@@ -49,6 +57,8 @@ function extractSessionId(cookieString: string): string | null {
 }
 
 export async function getTauriSessionId(): Promise<string> {
+    // store の初期化が完了するのを待つ
+    await storeInitPromise;
     const cookie = await store.get('cookie') as string;
     if (!cookie) {
         throw new Error('Cookie not found');

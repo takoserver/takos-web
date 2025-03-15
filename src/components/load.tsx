@@ -38,12 +38,13 @@ import {
   GroupChannel,
   Room,
 } from "../utils/room/roomUtils";
-import { isLoadedMessageState } from "./talk/Content";
+import { isLoadedMessageState } from "../components/talk/Content";
 import { createEffect } from "solid-js";
-import { groupChannelState } from "./sidebar/SideBar";
+import { groupChannelState } from "../components/sidebar/SideBar";
 import { getMessage } from "../utils/message/getMessage";
 import { TakosFetch } from "../utils/TakosFetch";
 import { getShareKey, saveAccountKey } from "../utils/storage/idb";
+import { userId } from "../utils/userId";
 
 export function Loading() {
   return (
@@ -78,10 +79,6 @@ export function Loading() {
     </>
   );
 }
-
-const userName = localStorage.getItem("userName") + "@" +
-  new URL(window.location.href).hostname;
-
 export function Load() {
   const [load, setLoad] = useAtom(loadState);
   const [login, setLogin] = useAtom(loginState);
@@ -154,7 +151,7 @@ export function Load() {
     console.log("session");
     if (session.login) {
       setLogin(true);
-      TakosFetch("/_takos/v1/user/nickName/" + userName, {
+      TakosFetch("/_takos/v1/user/nickName/" + userId, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -165,13 +162,13 @@ export function Load() {
             setNickName(data.nickName);
           }
         });
-      TakosFetch("/_takos/v1/user/description/" + userName).then((res) => res.json())
+      TakosFetch("/_takos/v1/user/description/" + userId).then((res) => res.json())
         .then((data) => {
           if (data.description) {
             setDiscription(data.description);
           }
         });
-      TakosFetch("/_takos/v1/user/icon/" + userName).then((res) => res.json()).then(
+      TakosFetch("/_takos/v1/user/icon/" + userId).then((res) => res.json()).then(
         (data) => {
           setIcon(data.icon);
         },
@@ -185,7 +182,7 @@ export function Load() {
     }
     if (session.setup) {
       const icon = await TakosFetch(
-        "/_takos/v1/user/icon/" + userName,
+        "/_takos/v1/user/icon/" + userId,
         {
           method: "GET",
           headers: {
@@ -196,8 +193,11 @@ export function Load() {
       const iconData = await icon.json();
       setIconState(iconData.icon);
       setSetUp(true);
+    } else {
+    console.log("not setup1");
     }
     if (session.deviceKey) {
+      console.log("deviceKey", session.deviceKey);
       setDeviceKey(session.deviceKey);
     }
     if (session.requests) {
@@ -440,7 +440,7 @@ export async function saveSharedAccountKey(hash: string, deviceKey: string) {
     return;
   }
   const shareKeyHash = JSON.parse(sharedAccountKey.accountKey).keyHash;
-  const encshareKey = await getShareKey(shareKeyHash);
+  const encshareKey = await getShareKey({ key: shareKeyHash });
   if (!encshareKey) {
     return;
   }

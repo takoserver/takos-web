@@ -30,7 +30,6 @@ import { Friends } from "./friend/friend";
 import { FriendDetail } from "./friend/detail";
 import { AddUserUI } from "./AddFriend";
 import { userId } from "../../utils/userId";
-
 export function Home() {
   const [selected, setSelected] = useAtom(homeSelectedAtom);
   const nickName = useAtomValue(nicknameState);
@@ -42,7 +41,6 @@ export function Home() {
   const [exampleGroupIcon, setExampleGroupIcon] = createSignal("");
   const [exampleGroupName, setExampleGroupName] = createSignal("");
   const [TakosFetchingUsers, setTakosFetchingUsers] = useAtom(TakosFetchingUsersState);
-
   createEffect(async () => {
     const friends = [];
     const groups = [];

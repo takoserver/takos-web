@@ -25,7 +25,6 @@ export const getCachedMessage = async (
       type,
       senderId,
     });
-    console.log(serverData);
     const messageData: MessageData = {
       verified: serverData.verified,
       encrypted: serverData.encrypted,

@@ -38,7 +38,7 @@ export function ChannelSideBar() {
   const setShowEditChannelModal = useSetAtom(showEditChannelModalState);
   // クリックでコンテキストメニューを閉じる
   onMount(() => {
-    const clickHandler = (e: MouseEvent) => {
+    const clickHandler = (_e: MouseEvent) => {
       setShowContextMenu(false);
     };
     document.addEventListener("click", clickHandler);

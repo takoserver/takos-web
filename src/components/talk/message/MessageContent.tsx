@@ -62,7 +62,6 @@ export function renderMessageContent(
           `data:${contentValue.metadata.mimeType};base64,${contentValue.uri}`,
         videoType: contentValue.metadata.mimeType,
         filename: contentValue.metadata.filename,
-        senderName: name,
       });
     }
     case "thumbnail": {

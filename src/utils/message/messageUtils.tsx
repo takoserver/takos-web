@@ -4,7 +4,6 @@ import { selectedChannelState, selectedRoomState } from "../room/roomState";
 import { deviceKeyState, inputMessageState } from "../state";
 import { decryptDataDeviceKey, encryptMessage } from "@takos/takos-encrypt-ink";
 import { createRoomKey } from "../room/createRoomKey";
-import { getIdentityKeys } from "../crypto/getIdentityKeys";
 import { groupChannelState } from "../../components/sidebar/SideBar";
 import { createTextContent } from "./getMessage";
 import {
@@ -374,7 +373,6 @@ export const sendHandler = async ({
 
       setCurrentOperation("メッセージを暗号化中...");
       setSendingProgress(50);
-
       const encrypted = await encryptMessage(
         {
           type,
@@ -565,4 +563,30 @@ export async function copyMessageContent(content: {
     console.error("メッセージのコピーに失敗しました:", err);
     return false;
   }
+}
+
+
+import { decryptIdentityKey, getAllIdentityKeys } from "../storage/idb";
+import { shoowIdentityKeyPopUp } from "../../components/encrypted/CreateIdentityKeyPopUp";
+
+export async function getIdentityKeys(deviceKeyVal: string) {
+  return createRoot(async () => {
+    const [showIdentityKeyPopUp, setShowIdentityKeyPopUp] = useAtom(
+      shoowIdentityKeyPopUp,
+    );
+    const identityKeys = await getAllIdentityKeys();
+    const latestIdentityKey = identityKeys.sort((a, b) =>
+      b.timestamp - a.timestamp
+    )[0];
+    if (!latestIdentityKey) {
+      setShowIdentityKeyPopUp(true);
+      return { decryptedIdentityKey: null, latestIdentityKey: null };
+    }
+    const decryptedIdentityKey = await decryptIdentityKey({
+      deviceKey: deviceKeyVal,
+      encryptedIdentityKey: latestIdentityKey.encryptedKey,
+    });
+
+    return { decryptedIdentityKey, latestIdentityKey };
+  });
 }

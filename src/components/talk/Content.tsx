@@ -12,10 +12,7 @@ import { getCachedMessage } from "../../utils/message/messageCache.ts";
 import { ChannelSideBar } from "./sideBar/ChannelSideBar.tsx";
 import LoadingAnimation from "./LoadingAnimation.tsx";
 import MentionReplyDisplay from "./send/MentionReplyDisplay.tsx";
-
-// ローカルユーザー名を取得
-const myuserName = localStorage.getItem("userName") + "@" +
-  document.location.hostname;
+import { userId } from "../../utils/userId.ts";
 
 // 状態管理
 export const messagesState = atom<MessageData[]>([]);
@@ -142,7 +139,7 @@ function MessageDisplay({ message }: { message: MessageData }) {
     setTimeout(() => setShow(true), 50);
   });
   const messageContent = () => {
-    if (message.serverData.userName === myuserName) {
+    if (message.serverData.userName === userId) {
       return (
         <ChatSendMessage
           time={message.serverData.timestamp}
@@ -255,7 +252,7 @@ function ChatTalkMain() {
       if (currentMessageCount > prevMessageCount()) {
         // 最新のメッセージが自分のメッセージか確認
         const lastMessage = messageTimeLine()[currentMessageCount - 1];
-        const isOwnMessage = lastMessage?.serverData.userName === myuserName;
+        const isOwnMessage = lastMessage?.serverData.userName === userId;
 
         // 自分のメッセージまたはスクロールが下にある場合は自動スクロール
         if (shouldAutoScroll() || isOwnMessage) {

@@ -93,10 +93,7 @@ class TauriStorage implements StorageInterface {
 
   async clear<T extends StoreNames>(storeName: T): Promise<void> {
     const store = await this.getStore(storeName);
-    const entries = await store.entries();
-    for (const key of Object.keys(entries)) {
-      await store.delete(key);
-    }
+    store.clear();
     await store.save();
   }
 }
@@ -426,10 +423,10 @@ export async function decryptIdentityKey({
   deviceKey: string;
   encryptedIdentityKey: string;
 }): Promise<IdentityKey> {
-  const decryptedIdentityKey = await decryptDataDeviceKey(
-    deviceKey,
-    encryptedIdentityKey,
-  );
+    const decryptedIdentityKey = await decryptDataDeviceKey(
+      deviceKey,
+      encryptedIdentityKey,
+    );
   if (!decryptedIdentityKey) {
     throw new Error("decryptedIdentityKey is not generated");
   }
@@ -627,4 +624,7 @@ export async function clearDB() {
   await storageInstance.clear("shareKeys");
   await storageInstance.clear("RoomKeys");
   await storageInstance.clear("shareSignKeys");
+  await storageInstance.clear("excludeUsers");
+  await storageInstance.clear("encrypteSetting");
+  await storageInstance.clear("notification");
 }

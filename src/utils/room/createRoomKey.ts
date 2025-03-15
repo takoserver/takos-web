@@ -132,11 +132,6 @@ async function collectFriendKeys(
           latest: false,
         });
       }
-      console.log(
-        !!friendMasterKey,
-        !!friendAccountKey,
-        !!friendAccountKeySign,
-      );
       // マスターキーの検証
       if (
         !verifyMasterKey(
@@ -217,8 +212,6 @@ async function getMyKeyInfo(
   }
 
   const accountKeyData = await accountKeyRes.json();
-  console.log(encryptedAccountKey.key);
-  console.log(await keyHash(accountKeyData.key));
   // キーハッシュの検証
   if (await keyHash(accountKeyData.key) !== encryptedAccountKey.key) {
     console.error("アカウントキーのハッシュが一致しません");

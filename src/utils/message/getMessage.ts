@@ -7,9 +7,7 @@ import {
   decryptDataRoomKey,
 } from "@takos/takos-encrypt-ink";
 import { TakosFetch } from "../TakosFetch";
-
-const userName = localStorage.getItem("userName") + "@" +
-  new URL(window.location.href).hostname;
+import { userId } from "../userId";
 
 // 新しいメッセージ型定義に基づくレスポンス型
 export interface MessageResponse {
@@ -118,7 +116,6 @@ export async function getMessage({
     encryptedMessage = await res.json();
   }
   const parsedMessage = JSON.parse(encryptedMessage.message);
-
   if (!parsedMessage.encrypted) {
     return {
       verified: false,
@@ -143,7 +140,7 @@ export async function getMessage({
       encryptedRoomKeyRes = await TakosFetch(
         `https://${
           messageid.split("@")[1]
-        }/_takos/v1/key/roomKey?roomId=${roomId}&targetUserId=${userName}&hash=${
+        }/_takos/v1/key/roomKey?roomId=${roomId}&targetUserId=${userId}&hash=${
           encodeURIComponent(roomKeyHash)
         }&userId=${senderId}`,
       );
@@ -151,29 +148,27 @@ export async function getMessage({
       encryptedRoomKeyRes = await TakosFetch(
         `https://${
           messageid.split("@")[1]
-        }/_takos/v1/key/roomKey?targetUserId=${userName}&hash=${
+        }/_takos/v1/key/roomKey?targetUserId=${userId}&hash=${
           encodeURIComponent(roomKeyHash)
         }&userId=${senderId}`,
       );
     }
-
+    
     if (!encryptedRoomKeyRes || encryptedRoomKeyRes.status !== 200) {
       throw new Error("Unauthorized");
     }
-
     const encryptedRoomKey = (await encryptedRoomKeyRes.json()).roomKey;
     const accountKeyHash = JSON.parse(encryptedRoomKey).keyHash;
-
-    const accountKey = await getAccountKey(accountKeyHash);
+    const accountKey = await getAccountKey({
+      key:accountKeyHash
+    });
     if (!accountKey) {
       throw new Error("AccountKey not found");
     }
-
     const decryptedAccountKey = await decryptAccountKey({
       deviceKey: deviceKeyVal,
       encryptedAccountKey: accountKey.encryptedKey,
     });
-
     if (!decryptedAccountKey) {
       throw new Error("Failed to decrypt accountKey");
     }
@@ -184,7 +179,6 @@ export async function getMessage({
     );
 
     if (!roomKeyResult) {
-      
       throw new Error("Failed to decrypt roomKey");
     }
 
@@ -196,11 +190,9 @@ export async function getMessage({
     roomKey,
     parsedMessage.value,
   );
-
   if (!decryptedMessage) {
     throw new Error("Failed to decrypt message");
   }
-  console.log("Decrypted message:", decryptedMessage);
   // 復号したメッセージをパース
   const decryptedContent = JSON.parse(decryptedMessage);
   return {
