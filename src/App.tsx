@@ -6,7 +6,7 @@ import "./App.css";
 import { ChangeURL } from "./components/utils/ChangeURL.tsx";
 import { Register } from "./components/register/index.tsx";
 import { Chat } from "./components/Chat.tsx";
-import { createEffect, createSignal } from "solid-js";
+import { createEffect, createSignal, Show } from "solid-js";
 import {
   CreateIdentityKeyPopUp,
   CreateShareSignKeyPopUp,
@@ -22,6 +22,7 @@ import { VideoPlayer } from "./components/talk/message/VideoPlayer.tsx";
 import { ChannelEditModal } from "./components/talk/sideBar/ChannelEditModal.tsx";
 import { CreateChannelModal } from "./components/talk/sideBar/CreateChannelModal.tsx";
 import { MentionListModal } from "./components/talk/message/MentionDisplay.tsx";
+import { SelectedServer } from "./components/register/selectServer.tsx";
 
 function App(
   { page }: { page?: "home" | "talk" | "friend" | "setting" | "notification" },
@@ -41,29 +42,37 @@ function App(
   createEffect(() => {
     console.log(load(), login());
   });
+  const [isSelectedServer, setIsSelectedServer] = createSignal(!!window.serverEndpoint);
   return (
     <>
-      <CreateChannelModal />
-      {!load() && <Loading />}
-      <CreateIdentityKeyPopUp />
-      <CreateShareSignKeyPopUp />
-      <CreateGroupPopUp />
-      <Css />
-      <ChangeURL />
-      <Load />
-      <MigrateKey />
-      {load() && login() && <Chat />}
-      {load() && !login() && <Register />}
-      {showEditChannelModal() && (
-        <ChannelEditModal
-          channel={contextMenuPosition().id}
-          type={contextMenuPosition().type!}
-          onClose={setShowEditChannelModal}
-        />
-      )}
-      <ImageViewer />
-      <VideoPlayer />
-      <MentionListModal />
+      <Show when={isSelectedServer()}>
+        <CreateChannelModal />
+        {!load() && <Loading />}
+        <CreateIdentityKeyPopUp />
+        <CreateShareSignKeyPopUp />
+        <CreateGroupPopUp />
+        <Css />
+        <ChangeURL />
+        <Load />
+        <MigrateKey />
+        {load() && login() && <Chat />}
+        {load() && !login() && <Register />}
+        {showEditChannelModal() && (
+          <ChannelEditModal
+            channel={contextMenuPosition().id}
+            type={contextMenuPosition().type!}
+            onClose={setShowEditChannelModal}
+          />
+        )}
+        <ImageViewer />
+        <VideoPlayer />
+        <MentionListModal />
+      </Show>
+      <Show when={!isSelectedServer()}>
+         <SelectedServer
+            setIsSelectedServer={setIsSelectedServer}
+         />
+      </Show>
     </>
   );
 }

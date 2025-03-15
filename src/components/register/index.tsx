@@ -10,6 +10,7 @@ import { Loading } from "../load.tsx";
 import { Register as RegisterComponent } from "./Register.tsx";
 import { Login as LoginComponent } from "./Login.tsx";
 import { DEFAULT_ICON } from "../utils/defaultIcon.ts";
+import { setTauriServerEndpoint } from "./selectServer.tsx";
 const sampleChatData = {
   roomName: "たこたこチャット",
   talkData: [
@@ -182,7 +183,8 @@ function SelectedServer() {
               <LoginComponent />
               <button
                 onClick={() => {
-                  alert("まだ実装してない！！！");
+                  setTauriServerEndpoint(null);
+                  window.location.reload();
                 }}
                 class="bg-[#192320] text-white rounded-3xl py-2 px-4 hover:bg-[#192320] border w-full lg:mt-2 mt-3"
               >
