@@ -42,7 +42,9 @@ function App(
   createEffect(() => {
     console.log(load(), login());
   });
-  const [isSelectedServer, setIsSelectedServer] = createSignal(!!window.serverEndpoint);
+  const [isSelectedServer, setIsSelectedServer] = createSignal(
+    !!window.serverEndpoint,
+  );
   return (
     <>
       <Show when={isSelectedServer()}>
@@ -69,9 +71,9 @@ function App(
         <MentionListModal />
       </Show>
       <Show when={!isSelectedServer()}>
-         <SelectedServer
-            setIsSelectedServer={setIsSelectedServer}
-         />
+        <SelectedServer
+          setIsSelectedServer={setIsSelectedServer}
+        />
       </Show>
     </>
   );

@@ -8,7 +8,11 @@ import { useAtom, useSetAtom } from "solid-jotai";
 import { PopUpFrame } from "./SetUpFrame.tsx";
 import { createEffect, createSignal } from "solid-js";
 import { arrayBufferToBase64 } from "../../utils/buffers.ts";
-import { encryptAccountKey, saveAccountKey, saveShareKey } from "../../utils/storage/idb.ts";
+import {
+  encryptAccountKey,
+  saveAccountKey,
+  saveShareKey,
+} from "../../utils/storage/idb.ts";
 import {
   encryptDataDeviceKey,
   generateAccountKey,

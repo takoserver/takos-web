@@ -104,11 +104,11 @@ export function CreateIdentityKeyPopUp() {
           sign: identityKey.sign,
         },
       });
-     await saveIdentityKey({
+      await saveIdentityKey({
         key: await keyHash(identityKey.publickKey),
         encryptedKey: encryptedIdentityKey,
-        timestamp: Date.now()
-     })
+        timestamp: Date.now(),
+      });
 
       setLastCreateIdentityKeyTime(new Date().toLocaleString());
       setShowIdentityKeyPopUp(false);
@@ -259,8 +259,8 @@ export function CreateShareSignKeyPopUp() {
     await saveShareSignKey({
       key: await keyHash(shareSignKey.publickKey),
       encryptedKey: encryptedShareSignKey,
-      timestamp: Date.now()
-    })
+      timestamp: Date.now(),
+    });
     setLastCreateTime(new Date().toLocaleString());
     setShowPopUp(false);
     alert("ShareSignKeyを作成しました");

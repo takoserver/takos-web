@@ -1,1 +1,2 @@
-export const userId = localStorage.getItem("userName") + "@" + window.serverEndpoint
+export const userId = localStorage.getItem("userName") + "@" +
+  window.serverEndpoint;

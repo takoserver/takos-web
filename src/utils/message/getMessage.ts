@@ -153,14 +153,14 @@ export async function getMessage({
         }&userId=${senderId}`,
       );
     }
-    
+
     if (!encryptedRoomKeyRes || encryptedRoomKeyRes.status !== 200) {
       throw new Error("Unauthorized");
     }
     const encryptedRoomKey = (await encryptedRoomKeyRes.json()).roomKey;
     const accountKeyHash = JSON.parse(encryptedRoomKey).keyHash;
     const accountKey = await getAccountKey({
-      key:accountKeyHash
+      key: accountKeyHash,
     });
     if (!accountKey) {
       throw new Error("AccountKey not found");

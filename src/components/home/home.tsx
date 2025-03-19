@@ -8,9 +8,7 @@ import {
 } from "../../utils/state";
 import { createEffect, createSignal } from "solid-js";
 import { TakosFetchingUsersState } from "../sidebar/SideBar";
-import {
-  TakosFetchMultipleEntityInfo,
-} from "../../utils/chache/Icon";
+import { TakosFetchMultipleEntityInfo } from "../../utils/chache/Icon";
 
 export const homeSelectedAtom = atom<
   | null
@@ -40,7 +38,9 @@ export function Home() {
   const [exampleFriendIcon, setExampleFriendIcon] = createSignal("");
   const [exampleGroupIcon, setExampleGroupIcon] = createSignal("");
   const [exampleGroupName, setExampleGroupName] = createSignal("");
-  const [TakosFetchingUsers, setTakosFetchingUsers] = useAtom(TakosFetchingUsersState);
+  const [TakosFetchingUsers, setTakosFetchingUsers] = useAtom(
+    TakosFetchingUsersState,
+  );
   createEffect(async () => {
     const friends = [];
     const groups = [];
@@ -73,7 +73,9 @@ export function Home() {
       const displayFriends = friends.slice(0, 3);
       try {
         // Icon.tsを使って友達情報を一括取得
-        const friendsInfoMap = await TakosFetchMultipleEntityInfo(displayFriends);
+        const friendsInfoMap = await TakosFetchMultipleEntityInfo(
+          displayFriends,
+        );
 
         // 友達の名前をカンマ区切りで設定
         const friendNames = Array.from(friendsInfoMap.values()).map((info) =>

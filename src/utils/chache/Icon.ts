@@ -32,7 +32,7 @@ export async function TakosFetchEntityInfo(
 
       // 並行して両方の情報を取得
       console.log(`https://${domain}/_takos/v1/${endpoints[0]}`);
-      
+
       const [iconResponse, nameResponse] = await Promise.all([
         TakosFetch(`https://${domain}/_takos/v1/${endpoints[0]}`).then((res) =>
           res.json()

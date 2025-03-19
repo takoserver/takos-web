@@ -8,7 +8,12 @@ import {
   verifyMasterKey,
 } from "@takos/takos-encrypt-ink";
 import { TakosFetch } from "../TakosFetch";
-import { getAllAccountKeys, getAllAllowKeys, saveAllowKey, saveRoomKey } from "../storage/idb";
+import {
+  getAllAccountKeys,
+  getAllAllowKeys,
+  saveAllowKey,
+  saveRoomKey,
+} from "../storage/idb";
 
 export async function createRoomKey(
   roomId: string,
@@ -105,8 +110,12 @@ async function collectFriendKeys(
 
       // 友達のマスターキーとアカウントキーを取得
       const [friendMasterKeyRes, friendAccountKeyRes] = await Promise.all([
-        TakosFetch(`https://${domain}/_takos/v1/key/masterKey?userId=${friendId}`),
-        TakosFetch(`https://${domain}/_takos/v1/key/accountKey?userId=${friendId}`),
+        TakosFetch(
+          `https://${domain}/_takos/v1/key/masterKey?userId=${friendId}`,
+        ),
+        TakosFetch(
+          `https://${domain}/_takos/v1/key/accountKey?userId=${friendId}`,
+        ),
       ]);
 
       if (

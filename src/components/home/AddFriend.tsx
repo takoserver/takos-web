@@ -36,7 +36,9 @@ export function AddUserUI() {
     try {
       // ユーザー検索リクエスト
       const domain = id.split("@")[1];
-      const icon = await TakosFetch(`https://${domain}/_takos/v1/user/icon/${id}`);
+      const icon = await TakosFetch(
+        `https://${domain}/_takos/v1/user/icon/${id}`,
+      );
       const nickName = await TakosFetch(
         `https://${domain}/_takos/v1/user/nickName/${id}`,
       );

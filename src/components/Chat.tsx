@@ -64,8 +64,8 @@ export function Chat() {
         >
           <div class="p-talk-list min-h-screen">
             <TalkListHeader />
-            <div class="p-talk-list-rooms pb-14">
-              <ul class="p-talk-list-rooms__ul h-[calc(100vh-120px)] pb-[70px]">
+            <div class="p-talk-list-rooms pb-14 scrollbar">
+              <ul class="p-talk-list-rooms__ul h-[calc(100vh-120px)] pb-[70px] scrollbar">
                 <SideBer />
               </ul>
             </div>

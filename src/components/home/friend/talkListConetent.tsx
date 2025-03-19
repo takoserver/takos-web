@@ -3,8 +3,8 @@ import { createEffect, createSignal, onMount } from "solid-js";
 import { homeSelectedAtom } from "../home";
 import { encrypted, setFriendDetailId } from "./friend";
 import {
-  TakosFetchEntityInfo,
   getCachedEntityInfo,
+  TakosFetchEntityInfo,
 } from "../../../utils/chache/Icon";
 
 export function TalkListFriend({

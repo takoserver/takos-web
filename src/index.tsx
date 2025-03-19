@@ -3,7 +3,8 @@ import { render } from "solid-js/web";
 import App from "./App";
 import { Router } from "@solidjs/router";
 import "./styles/loading.css";
-
+import ImageEditor from "./components/ImageEditor";
+import CropperDemo from "./components/Cropper.js/CropperDemo";
 const root = document.getElementById("root");
 
 const routes = [
@@ -47,6 +48,12 @@ const routes = [
     path: "/notification/:roomId",
     component: () => <App page="notification" />,
   },
+  {
+    path: "/test",
+    component: () => <CropperDemo />,
+  },
 ];
 
 render(() => <Router>{routes}</Router>, root!);
+
+export default App;

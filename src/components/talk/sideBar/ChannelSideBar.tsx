@@ -147,7 +147,9 @@ export function ChannelSideBar() {
                                   );
 
                                   if (!messages.ok) {
-                                    console.error("Failed to TakosFetch messages");
+                                    console.error(
+                                      "Failed to TakosFetch messages",
+                                    );
                                     return;
                                   }
 

@@ -151,7 +151,7 @@ export const getRoomKeyOrCreate = async (
     latestIdentityKey: any;
   },
 ) => {
-  const roomKeys = await getAllRoomKeys()
+  const roomKeys = await getAllRoomKeys();
   const encryptedRoomKey = roomKeys
     .sort((a, b) => b.timestamp - a.timestamp)
     .filter((key) => key.roomid === room.roomid)[0];
@@ -564,7 +564,6 @@ export async function copyMessageContent(content: {
     return false;
   }
 }
-
 
 import { decryptIdentityKey, getAllIdentityKeys } from "../storage/idb";
 import { shoowIdentityKeyPopUp } from "../../components/encrypted/CreateIdentityKeyPopUp";

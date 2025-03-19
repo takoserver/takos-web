@@ -1,8 +1,9 @@
-import {
-  convertTime,
-} from "../../utils/message/messageUtils.tsx";
+import { convertTime } from "../../utils/message/messageUtils.tsx";
 
-import { getSecurityStatus, renderMessageContent } from "../talk/message/MessageContent.tsx";
+import {
+  getSecurityStatus,
+  renderMessageContent,
+} from "../talk/message/MessageContent.tsx";
 // インターフェースを使用するようにコンポーネント定義を修正
 const ChatOtherMessage = ({
   icon,
@@ -13,18 +14,14 @@ const ChatOtherMessage = ({
   icon: string;
   nickName: string;
   time: string | number | Date;
-  content: any
+  content: any;
 }) => {
   const isPrimaryClass = true
     ? "c-talk-chat other primary"
     : "c-talk-chat other subsequent";
 
   return (
-    <li class={isPrimaryClass}
-    style={{
-      
-    }}
-    >
+    <li class={isPrimaryClass} style={{}}>
       <div class="c-talk-chat-box mb-1">
         {true && (
           <div class="c-talk-chat-icon">

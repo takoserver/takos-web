@@ -4,16 +4,31 @@ import {
   isValidAccountKeyPublic,
   keyHash,
 } from "@takos/takos-encrypt-ink";
-import { load, Store } from '@tauri-apps/plugin-store';
+import { load, Store } from "@tauri-apps/plugin-store";
 import { DBSchema, IDBPDatabase, openDB } from "idb";
 
 // ストレージインターフェース定義
-type StoreNames = "shareKeys" | "identityKeys" | "accountKeys" | "RoomKeys" | "allowKeys" | "shareSignKeys" | "excludeUsers" | "encrypteSetting" | "notification";
+type StoreNames =
+  | "shareKeys"
+  | "identityKeys"
+  | "accountKeys"
+  | "RoomKeys"
+  | "allowKeys"
+  | "shareSignKeys"
+  | "excludeUsers"
+  | "encrypteSetting"
+  | "notification";
 
 interface StorageInterface {
-  get<T extends StoreNames>(storeName: T, key: string): Promise<TakosDB[T]['value'] | undefined>;
-  put<T extends StoreNames>(storeName: T, value: TakosDB[T]['value']): Promise<void>;
-  getAll<T extends StoreNames>(storeName: T): Promise<TakosDB[T]['value'][]>;
+  get<T extends StoreNames>(
+    storeName: T,
+    key: string,
+  ): Promise<TakosDB[T]["value"] | undefined>;
+  put<T extends StoreNames>(
+    storeName: T,
+    value: TakosDB[T]["value"],
+  ): Promise<void>;
+  getAll<T extends StoreNames>(storeName: T): Promise<TakosDB[T]["value"][]>;
   delete<T extends StoreNames>(storeName: T, key: string): Promise<void>;
   clear<T extends StoreNames>(storeName: T): Promise<void>;
 }
@@ -26,17 +41,25 @@ class IndexedDBStorage implements StorageInterface {
     this.db = createTakosDB();
   }
 
-  async get<T extends StoreNames>(storeName: T, key: string): Promise<TakosDB[T]['value'] | undefined> {
+  async get<T extends StoreNames>(
+    storeName: T,
+    key: string,
+  ): Promise<TakosDB[T]["value"] | undefined> {
     const db = await this.db;
     return db.get(storeName, key);
   }
 
-  async put<T extends StoreNames>(storeName: T, value: TakosDB[T]['value']): Promise<void> {
+  async put<T extends StoreNames>(
+    storeName: T,
+    value: TakosDB[T]["value"],
+  ): Promise<void> {
     const db = await this.db;
     await db.put(storeName, value);
   }
 
-  async getAll<T extends StoreNames>(storeName: T): Promise<TakosDB[T]['value'][]> {
+  async getAll<T extends StoreNames>(
+    storeName: T,
+  ): Promise<TakosDB[T]["value"][]> {
     const db = await this.db;
     return db.getAll(storeName);
   }
@@ -64,23 +87,31 @@ class TauriStorage implements StorageInterface {
     return this.stores.get(storeName)!;
   }
 
-  async get<T extends StoreNames>(storeName: T, key: string): Promise<TakosDB[T]['value'] | undefined> {
+  async get<T extends StoreNames>(
+    storeName: T,
+    key: string,
+  ): Promise<TakosDB[T]["value"] | undefined> {
     const store = await this.getStore(storeName);
     return await store.get(key);
   }
 
-  async put<T extends StoreNames>(storeName: T, value: TakosDB[T]['value']): Promise<void> {
+  async put<T extends StoreNames>(
+    storeName: T,
+    value: TakosDB[T]["value"],
+  ): Promise<void> {
     const store = await this.getStore(storeName);
     await store.set(value.key, value);
     await store.save();
   }
 
-  async getAll<T extends StoreNames>(storeName: T): Promise<TakosDB[T]['value'][]> {
+  async getAll<T extends StoreNames>(
+    storeName: T,
+  ): Promise<TakosDB[T]["value"][]> {
     const store = await this.getStore(storeName);
     const entries = await store.entries();
-    const result: TakosDB[T]['value'][] = [];
+    const result: TakosDB[T]["value"][] = [];
     for (const [k, v] of entries) {
-      result.push(v as TakosDB[T]['value']);
+      result.push(v as TakosDB[T]["value"]);
     }
     return result;
   }
@@ -99,8 +130,8 @@ class TauriStorage implements StorageInterface {
 }
 
 // ストレージファクトリ
-const storageInstance: StorageInterface = (window as any).isApp 
-  ? new TauriStorage() 
+const storageInstance: StorageInterface = (window as any).isApp
+  ? new TauriStorage()
   : new IndexedDBStorage();
 
 export interface TakosDB extends DBSchema {
@@ -272,7 +303,7 @@ export async function getExcludeUsersList({
   if (!roomId) {
     return [];
   }
-  
+
   const allItems = await storageInstance.getAll("excludeUsers");
 
   // このルームIDに一致する除外ユーザーを抽出
@@ -423,10 +454,10 @@ export async function decryptIdentityKey({
   deviceKey: string;
   encryptedIdentityKey: string;
 }): Promise<IdentityKey> {
-    const decryptedIdentityKey = await decryptDataDeviceKey(
-      deviceKey,
-      encryptedIdentityKey,
-    );
+  const decryptedIdentityKey = await decryptDataDeviceKey(
+    deviceKey,
+    encryptedIdentityKey,
+  );
   if (!decryptedIdentityKey) {
     throw new Error("decryptedIdentityKey is not generated");
   }
@@ -480,7 +511,7 @@ export async function saveShareKey({
   await storageInstance.put("shareKeys", {
     key: key,
     encryptedKey,
-    timestamp
+    timestamp,
   });
 }
 
@@ -504,7 +535,7 @@ export async function saveAccountKey({
   await storageInstance.put("accountKeys", {
     key: key,
     encryptedKey,
-    timestamp
+    timestamp,
   });
 }
 
@@ -524,7 +555,7 @@ export async function saveIdentityKey({
   await storageInstance.put("identityKeys", {
     key: key,
     encryptedKey,
-    timestamp
+    timestamp,
   });
 }
 
@@ -552,7 +583,7 @@ export async function saveShareSignKey({
   await storageInstance.put("shareSignKeys", {
     key: key,
     encryptedKey,
-    timestamp
+    timestamp,
   });
 }
 
@@ -579,7 +610,7 @@ export async function saveAllowKey({
     key: key,
     userId,
     timestamp,
-    latest
+    latest,
   });
 }
 
@@ -609,7 +640,7 @@ export async function saveRoomKey({
     encryptedKey,
     timestamp,
     roomid,
-    metaData
+    metaData,
   });
 }
 

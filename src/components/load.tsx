@@ -162,17 +162,20 @@ export function Load() {
             setNickName(data.nickName);
           }
         });
-      TakosFetch("/_takos/v1/user/description/" + userId).then((res) => res.json())
+      TakosFetch("/_takos/v1/user/description/" + userId).then((res) =>
+        res.json()
+      )
         .then((data) => {
           if (data.description) {
             setDiscription(data.description);
           }
         });
-      TakosFetch("/_takos/v1/user/icon/" + userId).then((res) => res.json()).then(
-        (data) => {
-          setIcon(data.icon);
-        },
-      );
+      TakosFetch("/_takos/v1/user/icon/" + userId).then((res) => res.json())
+        .then(
+          (data) => {
+            setIcon(data.icon);
+          },
+        );
     } else {
       console.log("not login1");
       setLogin(false);
@@ -194,7 +197,7 @@ export function Load() {
       setIconState(iconData.icon);
       setSetUp(true);
     } else {
-    console.log("not setup1");
+      console.log("not setup1");
     }
     if (session.deviceKey) {
       console.log("deviceKey", session.deviceKey);
@@ -468,7 +471,7 @@ export async function saveSharedAccountKey(hash: string, deviceKey: string) {
     console.log("verifyDataShareSignKey failed");
     return;
   }
-  await  saveAccountKey({
+  await saveAccountKey({
     key: await keyHash(JSON.parse(accountKey).publicKey),
     encryptedKey: accountKey,
     timestamp: (JSON.parse(JSON.parse(accountKey).publicKey)).timestamp,

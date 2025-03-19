@@ -215,7 +215,9 @@ ${verificationStatus.icon} ${verificationStatus.text}`);
   createEffect(async () => {
     if (props.content.mention && props.content.mention.length > 0) {
       try {
-        const mentionMap = await TakosFetchMultipleEntityInfo(props.content.mention);
+        const mentionMap = await TakosFetchMultipleEntityInfo(
+          props.content.mention,
+        );
         setMentionInfos(mentionMap);
       } catch (error) {
         console.error("メンション情報の取得に失敗しました", error);

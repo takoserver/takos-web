@@ -67,7 +67,9 @@ export function AccountManagement() {
   const handleTerminateSession = async (sessionId: string) => {
     try {
       if (confirm("このセッションを終了しますか？")) {
-        await TakosFetch(`/api/v2/sessions/delete/${sessionId}`, { method: "POST" });
+        await TakosFetch(`/api/v2/sessions/delete/${sessionId}`, {
+          method: "POST",
+        });
         alert("セッションを終了しました。");
         window.location.reload();
       }

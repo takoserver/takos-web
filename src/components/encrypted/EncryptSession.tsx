@@ -19,7 +19,11 @@ import { atom, useAtom, useSetAtom } from "solid-jotai";
 import { PopUpFrame } from "./SetUpFrame";
 import { createEffect, createSignal } from "solid-js";
 import fnv1a from "fnv1a";
-import { encryptAccountKey, saveAccountKey, saveShareKey } from "../../utils/storage/idb";
+import {
+  encryptAccountKey,
+  saveAccountKey,
+  saveShareKey,
+} from "../../utils/storage/idb";
 import {
   decryptDataDeviceKey,
   encryptDataDeviceKey,
@@ -127,19 +131,22 @@ export function EncryptSession() {
                           );
 
                           if (!accountKey || !shareKey) return;
-                          const res = await TakosFetch("/api/v2/sessions/reset", {
-                            method: "POST",
-                            headers: {
-                              "Content-Type": "application/json",
+                          const res = await TakosFetch(
+                            "/api/v2/sessions/reset",
+                            {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                              },
+                              body: JSON.stringify({
+                                masterKey: masterKey.publicKey,
+                                accountKey: accountKey.publickKey,
+                                accountKeySign: accountKey.sign,
+                                shareKey: shareKey.publickKey,
+                                shareKeySign: shareKey.sign,
+                              }),
                             },
-                            body: JSON.stringify({
-                              masterKey: masterKey.publicKey,
-                              accountKey: accountKey.publickKey,
-                              accountKeySign: accountKey.sign,
-                              shareKey: shareKey.publickKey,
-                              shareKeySign: shareKey.sign,
-                            }),
-                          });
+                          );
                           if (res.status === 200) {
                             setEncryptedSessionState(true);
                             setSetted(true);
@@ -161,8 +168,8 @@ export function EncryptSession() {
                                 },
                               },
                             );
-                            console.log(deviceKeyS)
-                            console.log(encryptedAccountKey)
+                            console.log(deviceKeyS);
+                            console.log(encryptedAccountKey);
                             const encryptedShareKey =
                               await encryptDataDeviceKey(
                                 deviceKeyS,

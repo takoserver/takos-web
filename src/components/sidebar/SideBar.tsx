@@ -23,6 +23,7 @@ import { TakosFetchEntityInfo } from "../../utils/chache/Icon.ts";
 import entityInfoCache from "../../utils/chache/Icon.ts";
 import { TakosFetch } from "../../utils/TakosFetch.ts";
 import { getAllAllowKeys } from "../../utils/storage/idb.ts";
+import Sns from "../sns/indx.tsx";
 
 export function SideBer() {
   const [page] = useAtom(pageState);
@@ -33,6 +34,7 @@ export function SideBer() {
       {page() === "setting" && <Setting />}
       {page() === "notification" && <Notification />}
       {page() === "talk" && <TalkList />}
+      {page() === "sns" && Sns()}
     </>
   );
 }
@@ -217,7 +219,11 @@ function TalkGroup({
 
     try {
       // 共有キャッシュを使用して情報を取得
-      const result = await TakosFetchEntityInfo(groupId, domainFromRoom, "group");
+      const result = await TakosFetchEntityInfo(
+        groupId,
+        domainFromRoom,
+        "group",
+      );
       if (result) {
         setIcon(result.icon);
         setNickName(result.nickName);

@@ -15,6 +15,7 @@
         }
       ]
     },
-    "store:default"
+    "store:default",
+    "notification:default"
   ]
 }

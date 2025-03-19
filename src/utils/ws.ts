@@ -29,7 +29,6 @@ import {
 import { getTauriSessionId, TakosFetch } from "./TakosFetch.ts";
 import { saveAccountKey, saveAllowKey, saveShareKey } from "./storage/idb.ts";
 
-
 declare global {
   interface Window {
     isApp?: boolean;
@@ -60,11 +59,11 @@ export function createWebsocket(loadedFn: () => void) {
 
     // WebSocketを接続する関数
     const connectWebSocket = async () => {
-      const protocol = "wss:"
-      const host = window.serverEndpoint
-      let websocket
+      const protocol = "wss:";
+      const host = window.serverEndpoint;
+      let websocket;
 
-      if(window.isApp) {
+      if (window.isApp) {
         const sessionid = await getTauriSessionId();
         websocket = new WebSocket(
           `${protocol}//${host}/api/v2/ws?sessionid=${sessionid}`,
