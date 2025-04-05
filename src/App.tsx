@@ -23,6 +23,7 @@ import { ChannelEditModal } from "./components/talk/sideBar/ChannelEditModal.tsx
 import { CreateChannelModal } from "./components/talk/sideBar/CreateChannelModal.tsx";
 import { MentionListModal } from "./components/talk/message/MentionDisplay.tsx";
 import { SelectedServer } from "./components/register/selectServer.tsx";
+import Call from "./components/Call/index.tsx";
 
 function App(
   { page }: { page?: "home" | "talk" | "friend" | "setting" | "notification" },
@@ -75,6 +76,7 @@ function App(
           setIsSelectedServer={setIsSelectedServer}
         />
       </Show>
+      <Call />
     </>
   );
 }

@@ -151,3 +151,31 @@
 .sending-indicator {
   animation: pulse 1.5s infinite;
 }
+
+.tui-image-editor-container {
+  min-height: 100vh !important;
+  max-height: 100vh !important;
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.tui-image-editor-main {
+  height: 100% !important;
+}
+
+.tui-image-editor-main-container {
+  height: 100% !important;
+}
+
+/* ツールバーボタンのスタイル強化 */
+.toolbar-button {
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.2s;
+}
+
+.toolbar-button:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+  transform: scale(1.05);
+}

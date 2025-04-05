@@ -28,6 +28,7 @@ import {
 } from "@takos/takos-encrypt-ink";
 import { getTauriSessionId, TakosFetch } from "./TakosFetch.ts";
 import { saveAccountKey, saveAllowKey, saveShareKey } from "./storage/idb.ts";
+import { callState } from "../components/Call/index.tsx";
 
 declare global {
   interface Window {
@@ -51,6 +52,7 @@ export function createWebsocket(loadedFn: () => void) {
     const setPage = useSetAtom(migrateRequestPage);
     const migrateKeyPrivate = useAtomValue(migrateKeyPrivateState);
     const deviceKey = useAtomValue(deviceKeyState);
+    const [call, setCall] = useAtom(callState);
 
     // 再接続関連の変数
     let reconnectAttempts = 0;
@@ -247,6 +249,58 @@ export function createWebsocket(loadedFn: () => void) {
               alert("Migrate Success");
               window.location.reload();
             }
+            break;
+          }
+          case "callRequest": {
+            // 着信処理
+            const callData = JSON.parse(data.data);
+            console.log("着信:", callData);
+            if (call()) {
+              // 通話中の場合は着信を無視
+              return;
+            }
+            // 着信音を再生（オプション）
+            const audio = new Audio("/sounds/call-incoming.mp3");
+            audio.loop = true;
+            audio.play().catch((err) =>
+              console.error("着信音の再生に失敗:", err)
+            );
+            console.log("callData", callData);
+            // callStateを更新して着信画面を表示
+            setCall({
+              type: callData.type,
+              mode: callData.mode, // または callData.mode に基づいて設定
+              friendId: callData.userId,
+              isEncrypted: false, // 必要に応じて調整
+              status: "incoming",
+              _audioRef: audio,
+              isCaller: false,
+            });
+            break;
+          }
+          case "callAccept": {
+            // 通話応答処理
+            const acceptData = JSON.parse(data.data);
+            console.log("通話応答:", acceptData);
+
+            // callStateを更新して通話中状態に変更
+            setCall((prev) => {
+              // 着信音を停止
+              if (prev && prev._audioRef) {
+                prev._audioRef.pause();
+                prev._audioRef.currentTime = 0;
+              }
+
+              return prev
+                ? {
+                  ...prev,
+                  status: "connected",
+                  token: acceptData.token,
+                }
+                : null;
+            });
+            // MediaSoupクライアントの初期化は audio.tsx の createEffect で行われるため削除
+            break;
           }
         }
       };

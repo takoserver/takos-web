@@ -1,10 +1,12 @@
-import { onMount, onCleanup } from "solid-js";
+import { onCleanup, onMount } from "solid-js";
 import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.css";
 
 type Props = {
   src: string;
   onCropped?: (dataUrl: string) => void;
+  aspectRatio: number;
+  ref?: { handleCrop: () => void };
 };
 
 export default function SolidCropper(props: Props) {
@@ -12,9 +14,14 @@ export default function SolidCropper(props: Props) {
   let cropper: Cropper;
 
   onMount(() => {
+    //@ts-ignore
     cropper = new Cropper(imageRef, {
-      aspectRatio: 1,
+      aspectRatio: props.aspectRatio,
       viewMode: 1,
+      responsive: true,
+      restore: true,
+      autoCropArea: 0.8,
+      checkOrientation: false, // より速く表示するためにOrientationチェックをスキップ
     });
   });
 
@@ -28,10 +35,15 @@ export default function SolidCropper(props: Props) {
     }
   };
 
+  // refを通じてhandleCrop関数を外部に公開
+  if (props.ref) {
+    props.ref.handleCrop = handleCrop;
+  }
+
   return (
-    <>
-      <img ref={imageRef} src={props.src} />
-      <button onClick={handleCrop}>トリミング</button>
-    </>
+    <div class="cropper-container" style={{ "max-height": "100%" }}>
+      {/*@ts-ignore */}
+      <img ref={imageRef} src={props.src} style={{ "max-width": "100%" }} />
+    </div>
   );
 }

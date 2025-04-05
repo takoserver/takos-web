@@ -8,6 +8,7 @@ import {
 } from "@takos/takos-encrypt-ink";
 import { TakosFetch } from "../TakosFetch";
 import { userId } from "../userId";
+import { load } from '@tauri-apps/plugin-store';
 
 // 新しいメッセージ型定義に基づくレスポンス型
 export interface MessageResponse {
@@ -50,6 +51,14 @@ export async function getMessage({
   }
   // TakosFetch APIの代わりにXMLHttpRequestを使用して進捗を追跡
   let encryptedMessage;
+
+  if(window.isApp) {
+    const store = await load('messages.json', { autoSave: false });
+    const message = await store.get(messageid);
+    if (message) {
+      return message as MessageResponse;
+    }
+  }
 
   if (isProgress) {
     encryptedMessage = await new Promise<any>((resolve, reject) => {
@@ -117,6 +126,21 @@ export async function getMessage({
   }
   const parsedMessage = JSON.parse(encryptedMessage.message);
   if (!parsedMessage.encrypted) {
+    if(window.isApp) {
+      const store = await load('messages.json', { autoSave: false });
+      await store.set(messageid, {
+        verified: false,
+        encrypted: false,
+        value: parsedMessage.value,
+        channel: parsedMessage.channel,
+        original: parsedMessage.original,
+        timestamp: encryptedMessage.timestamp,
+        isLarge: parsedMessage.isLarge,
+      });
+      await store.save();
+    }
+    // 復号化されていないメッセージはそのまま返す
+    // 署名検証が実装されていない場合はfalse
     return {
       verified: false,
       encrypted: false,
@@ -195,6 +219,26 @@ export async function getMessage({
   }
   // 復号したメッセージをパース
   const decryptedContent = JSON.parse(decryptedMessage);
+
+  if(window.isApp) {
+    const store = await load('messages.json', { autoSave: false });
+    await store.set(messageid, {
+      verified: false,
+      encrypted: true,
+      value: {
+        type: decryptedContent.type,
+        content: decryptedContent.content,
+        reply: decryptedContent.reply,
+        mention: decryptedContent.mention || [],
+      },
+      channel: parsedMessage.channel,
+      original: parsedMessage.original,
+      timestamp: encryptedMessage.timestamp,
+      isLarge: parsedMessage.isLarge,
+    });
+    await store.save();
+  }
+
   return {
     verified: false, // 署名検証が実装されていない場合はfalse
     encrypted: true,

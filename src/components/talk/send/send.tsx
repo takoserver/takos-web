@@ -1,15 +1,10 @@
-import {
-  deviceKeyState,
-  inputMessageState,
-  isValidInputState,
-} from "../../../utils/state.ts";
-import { atom, useAtom } from "solid-jotai";
+import { inputMessageState, isValidInputState } from "../../../utils/state.ts";
+import { useAtom } from "solid-jotai";
 import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 import {
   selectedChannelState,
   selectedRoomState,
 } from "../../../utils/room/roomState.ts";
-import { groupChannelState } from "../../sidebar/SideBar.tsx";
 import {
   clearMentionReplyState,
   EVERYONE_MENTION_ID,
@@ -17,8 +12,6 @@ import {
   mentionListState,
   replyTargetState,
 } from "../../../utils/message/mentionReply.ts";
-import MentionReplyDisplay from "./MentionReplyDisplay.tsx";
-
 import {
   currentOperationAtom,
   isEncryptedAtom,

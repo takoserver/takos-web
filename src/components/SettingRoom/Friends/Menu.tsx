@@ -2,11 +2,29 @@ import { useAtom } from "solid-jotai";
 import { selectedFriendTabState } from "../../../utils/room/settingRoomState";
 import { createSignal } from "solid-js";
 import { NotificationToggle } from "../Common/Notification";
+import { TakosFetch } from "../../../utils/TakosFetch";
+import {
+  isSelectRoomState,
+  nickNameState,
+  roomKeyState,
+  selectedChannelState,
+  selectedRoomState,
+} from "../../../utils/room/roomState";
+import {
+  getIdentityKeys,
+  getRoomKeyOrCreate,
+} from "../../../utils/message/messageUtils";
+import { deviceKeyState } from "../../../utils/state";
+import { keyHash } from "@takos/takos-encrypt-ink";
+import { callState } from "../../Call";
 
 export function FriendSettingMenu() {
   const [selected, setSelected] = useAtom(selectedFriendTabState);
   const [notificationEnabled, setNotificationEnabled] = createSignal(true);
-
+  const [showCallOptions, setShowCallOptions] = createSignal(false);
+  const [selectedRoom] = useAtom(selectedRoomState);
+  const [deviceKey] = useAtom(deviceKeyState);
+  const [call, setCall] = useAtom(callState);
   return (
     <>
       {!selected() && (
@@ -20,8 +38,10 @@ export function FriendSettingMenu() {
             />
 
             <div
-              class="flex flex-col items-center hover:scale-105 transition-transform duration-200 cursor-pointer"
-              onClick={() => alert("通話はまだ実装されていません")}
+              class="flex flex-col items-center hover:scale-105 transition-transform duration-200 cursor-pointer relative"
+              onClick={() => {
+                setShowCallOptions(!showCallOptions());
+              }}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -38,6 +58,163 @@ export function FriendSettingMenu() {
                 />
               </svg>
               <span class="mt-2 text-sm text-white">通話</span>
+              {showCallOptions() && (
+                <div class="absolute top-full mt-2 bg-gray-800 rounded-lg shadow-lg p-2 z-10 w-32">
+                  <div class="p-2 hover:bg-gray-700 rounded cursor-pointer text-center">
+                    <span class="text-white">呼び出し</span>
+                  </div>
+                  <div
+                    class="p-2 hover:bg-gray-700 rounded cursor-pointer text-center"
+                    onClick={async () => {
+                      console.log("call audio");
+                      const roomInfo = selectedRoom();
+                      if (!roomInfo) {
+                        console.error("roomInfo is not found");
+                        return;
+                      }
+                      if (roomInfo.type !== "friend") {
+                        console.error("roomInfo is not friend");
+                        return;
+                      }
+                      const mutch = roomInfo.roomid.match(
+                        /^m\{([^}]+)\}@(.+)$/,
+                      );
+                      if (!mutch) {
+                        console.error("roomInfo is not friend");
+                        return;
+                      }
+                      const roomIdUserName = mutch[1];
+                      const roomIdDomain = mutch[2];
+                      const deviceKeyVal = deviceKey();
+                      if (!deviceKeyVal) {
+                        console.error("deviceKey is not found");
+                        return;
+                      }
+                      const { decryptedIdentityKey, latestIdentityKey } =
+                        await getIdentityKeys(
+                          deviceKeyVal,
+                        );
+                      const roomKey = await getRoomKeyOrCreate(
+                        {
+                          room: { type: "friend", roomid: roomInfo.roomid },
+                          deviceKeyVal,
+                          decryptedIdentityKey,
+                          latestIdentityKey,
+                        },
+                      );
+                      if (!roomKey) {
+                        console.error("roomKey is not found");
+                        return;
+                      }
+                      const res = await TakosFetch(
+                        "/api/v2/call/friend/audio/request",
+                        {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify({
+                            friendId: roomIdUserName + "@" + roomIdDomain,
+                            roomKeyHash: await keyHash(roomKey),
+                          }),
+                        },
+                      );
+                      if (res.status === 200) {
+                        console.log("success");
+                        setCall({
+                          friendId: roomIdUserName + "@" + roomIdDomain,
+                          isEncrypted: true,
+                          mode: "audio",
+                          roomId: roomInfo.roomid,
+                          roomKeyHash: await keyHash(roomKey),
+                          type: "friend",
+                          status: "outgoing",
+                          isCaller: true,
+                        });
+                      } else {
+                        console.error("error");
+                      }
+                    }}
+                  >
+                    <span class="text-white">音声</span>
+                  </div>
+                  <div 
+                    class="p-2 hover:bg-gray-700 rounded cursor-pointer text-center"
+                    onClick={async () => {
+                      console.log("call video");
+                      const roomInfo = selectedRoom();
+                      if (!roomInfo) {
+                        console.error("roomInfo is not found");
+                        return;
+                      }
+                      if (roomInfo.type !== "friend") {
+                        console.error("roomInfo is not friend");
+                        return;
+                      }
+                      const mutch = roomInfo.roomid.match(
+                        /^m\{([^}]+)\}@(.+)$/,
+                      );
+                      if (!mutch) {
+                        console.error("roomInfo is not friend");
+                        return;
+                      }
+                      const roomIdUserName = mutch[1];
+                      const roomIdDomain = mutch[2];
+                      const deviceKeyVal = deviceKey();
+                      if (!deviceKeyVal) {
+                        console.error("deviceKey is not found");
+                        return;
+                      }
+                      const { decryptedIdentityKey, latestIdentityKey } =
+                        await getIdentityKeys(
+                          deviceKeyVal,
+                        );
+                      const roomKey = await getRoomKeyOrCreate(
+                        {
+                          room: { type: "friend", roomid: roomInfo.roomid },
+                          deviceKeyVal,
+                          decryptedIdentityKey,
+                          latestIdentityKey,
+                        },
+                      );
+                      if (!roomKey) {
+                        console.error("roomKey is not found");
+                        return;
+                      }
+                      const res = await TakosFetch(
+                        "/api/v2/call/friend/video/request",
+                        {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify({
+                            friendId: roomIdUserName + "@" + roomIdDomain,
+                            roomKeyHash: await keyHash(roomKey),
+                          }),
+                        },
+                      );
+                      if (res.status === 200) {
+                        console.log("success");
+                        setCall({
+                          friendId: roomIdUserName + "@" + roomIdDomain,
+                          isEncrypted: true,
+                          mode: "video",
+                          roomId: roomInfo.roomid,
+                          roomKeyHash: await keyHash(roomKey),
+                          type: "friend",
+                          status: "outgoing",
+                          isCaller: true,
+                        });
+                      } else {
+                        console.error("error");
+                      }
+                    }}
+                  >
+                    <span class="text-white">ビデオ</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* ブロックアイコン */}

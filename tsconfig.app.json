@@ -21,5 +21,9 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "../takos-web/islands/ChatTalkContent.tsx"]
+  "include": [
+    "src",
+    "../takos-web/islands/ChatTalkContent.tsx",
+    "../takos/ws.ts"
+  ]
 }
