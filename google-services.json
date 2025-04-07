@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "904208614929",
+    "project_id": "takoserver-b407a",
+    "storage_bucket": "takoserver-b407a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:904208614929:android:4cb4b89fbdb18e8e1a93b0",
+        "android_client_info": {
+          "package_name": "jp.takos.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBiAPQOtI-Rlm81k9XTCMN3eSz7SoznoHw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

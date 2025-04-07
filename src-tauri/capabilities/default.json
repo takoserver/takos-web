@@ -16,6 +16,7 @@
       ]
     },
     "store:default",
-    "notification:default"
+    "notification:default",
+    "fcm:default"
   ]
 }

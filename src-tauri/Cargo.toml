@@ -28,3 +28,5 @@ tauri-plugin-websocket = "2"
 tauri-plugin-store = "2"
 tauri-plugin-notification = "2"
 cpal = "0.15.2"
+
+tauri-plugin-fcm = { path = "tauri-plugin-fcm" }
