@@ -6,3 +6,4 @@ permissions = [
     "allow-get-token",
     "allow-subscribe-to-topic"
 ]
+

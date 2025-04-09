@@ -9,6 +9,7 @@ import app.tauri.annotation.TauriPlugin
 import app.tauri.plugin.JSObject
 import app.tauri.plugin.Plugin
 import app.tauri.plugin.Invoke
+import app.tauri.plugin.Channel
 
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
@@ -20,6 +21,11 @@ class SubscribeToTopicArgs {
     lateinit var topic: String
 }
 
+@InvokeArg
+class SetEventHandlerArgs {
+    lateinit var handler: Channel
+}
+
 @TauriPlugin
 class FCMPlugin(private val activity: Activity) : Plugin(activity) {
     companion object {
@@ -27,6 +33,8 @@ class FCMPlugin(private val activity: Activity) : Plugin(activity) {
     }
 
     private var latestData = JSObject()
+    private var notificationChannel: Channel? = null
+    private var pushChannel: Channel? = null
 
     override fun load(webView: WebView) {
         instance = this
@@ -58,7 +66,7 @@ class FCMPlugin(private val activity: Activity) : Plugin(activity) {
                 }
 
                 this.latestData = result
-                trigger("pushNotificationOpened", result)
+                notificationChannel?.send(result)
             }
         }
     }
@@ -66,10 +74,8 @@ class FCMPlugin(private val activity: Activity) : Plugin(activity) {
     fun onPushReceived(data: Map<String, String>) {
         val payload = JSObject()
         data.forEach { (k, v) -> payload.put(k, v) }
-        println("呼び出されてるかチェック2")
-        trigger("pushNotificationReceived", payload)
+        pushChannel?.send(payload)
     }
-    
 
     @Command
     fun getLatestNotificationData(invoke: Invoke) {
@@ -96,4 +102,19 @@ class FCMPlugin(private val activity: Activity) : Plugin(activity) {
         }
     }
 
+    @Command
+    fun setNotificationOpenedHandler(invoke: Invoke) {
+        val args = invoke.parseArgs(SetEventHandlerArgs::class.java)
+        this.notificationChannel = args.handler
+        invoke.resolve()
+    }
+
+    @Command
+    fun setPushReceivedHandler(invoke: Invoke) {
+        val args = invoke.parseArgs(SetEventHandlerArgs::class.java)
+        this.pushChannel = args.handler
+        invoke.resolve()
+    }
 }
+
+

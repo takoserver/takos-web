@@ -2,13 +2,11 @@ import { render } from "solid-js/web";
 import App from "./App";
 import { Router } from "@solidjs/router";
 import "./styles/loading.css";
-import { subscribeToTopic, getFCMToken, onPushNotificationOpened, getLatestNotificationData } from '../src-tauri/tauri-plugin-fcm/guest-js/index.ts';
+import { subscribeToTopic, getFCMToken, onPushNotificationOpened, getLatestNotificationData, onPushNotificationReceived } from '../src-tauri/tauri-plugin-fcm/guest-js/index.ts';
 import { requestPermission, isPermissionGranted, sendNotification } from '@tauri-apps/plugin-notification'
-import { emit, listen } from "@tauri-apps/api/event";
-import { addPluginListener, PluginListener } from '@tauri-apps/api/core';
-const root = document.getElementById("root");
-
 import { createSignal, onMount } from "solid-js";
+
+const root = document.getElementById("root");
 
 function Test() {
   const [token, setToken] = createSignal<string | null>(null);
@@ -20,17 +18,16 @@ function Test() {
   }
 
   onMount(() => {
-    listen("pushNotificationReceived", (event) => {
-      console.log("Push notification opened:", event.payload);
-      alert("Push notification opened: ");
-    });
-    console.log("Listening to pushNotificationReceived event");
-
-    addPluginListener("tauri-plugin-fcm", "pushNotificationReceived", (event) => {
-      console.log("Push notification received:");
-      alert("Push notification received: ");
+    // Tauriのイベントシステムを使用して通知イベントをリスン
+    onPushNotificationReceived((data) => {
+      console.log("Push notification received:", data);
+      alert("Push notification received: " + JSON.stringify(data));
     });
 
+    onPushNotificationOpened(({ data, sentAt, openedAt }) => {
+      console.log("Push notification opened:", { data, sentAt, openedAt });
+      alert("Push notification opened: " + JSON.stringify(data));
+    });
   })
 
   function copyToClipboard() {
@@ -66,7 +63,6 @@ function Test() {
       });
     }
   }
-
   return (
     <>
       <div class="p-4 mb-4 bg-gray-50 rounded-lg border border-gray-200">

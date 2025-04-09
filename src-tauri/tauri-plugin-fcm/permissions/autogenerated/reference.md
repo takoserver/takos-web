@@ -71,6 +71,32 @@ Denies the get_token command without any pre-configured scope.
 <tr>
 <td>
 
+`fcm:allow-listener`
+
+</td>
+<td>
+
+Enables the plugin to register event listeners.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`fcm:deny-listener`
+
+</td>
+<td>
+
+Denies the plugin from registering event listeners.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
 `fcm:allow-register-listener`
 
 </td>

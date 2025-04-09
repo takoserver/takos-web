@@ -315,6 +315,16 @@
           "const": "deny-get-token"
         },
         {
+          "description": "Enables the plugin to register event listeners.",
+          "type": "string",
+          "const": "allow-listener"
+        },
+        {
+          "description": "Denies the plugin from registering event listeners.",
+          "type": "string",
+          "const": "deny-listener"
+        },
+        {
           "description": "Enables the register_listener command without any pre-configured scope.",
           "type": "string",
           "const": "allow-register-listener"

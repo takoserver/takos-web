@@ -33,3 +33,4 @@ pub struct SubscribeToTopicRequest {
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SubscribeToTopicResponse {}
+

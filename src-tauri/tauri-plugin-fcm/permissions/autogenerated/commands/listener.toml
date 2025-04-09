@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-listener"
+description = "Enables the plugin to register event listeners."
+commands.allow = ["listener"]
+
+[[permission]]
+identifier = "deny-listener"
+description = "Denies the plugin from registering event listeners."
+commands.deny = ["listener"]

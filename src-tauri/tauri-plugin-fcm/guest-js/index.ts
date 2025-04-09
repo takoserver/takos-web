@@ -1,12 +1,12 @@
 import {
-  addPluginListener,
   invoke,
   type PluginListener,
 } from "@tauri-apps/api/core";
+import { listen } from '@tauri-apps/api/event';
 
 
 /**
- * Listen to FCM messages data
+ * Listen for push notification opened events
  */
 export async function onPushNotificationOpened(
   handler: (payload: {
@@ -14,16 +14,30 @@ export async function onPushNotificationOpened(
     sentAt: Date;
     openedAt: Date;
   }) => void,
-): Promise<PluginListener> {
-  return await addPluginListener(
-    "fcm",
-    "pushNotificationOpened",
-    ({ data, openedAt, sentAt }: {
-      data: Record<string, string>;
-      sentAt: number;
-      openedAt: number;
-    }) => {
-      handler({ data, sentAt: new Date(sentAt), openedAt: new Date(openedAt) });
+): Promise<any> {
+  return await listen(
+    "fcm://notification-opened",
+    ({ payload }) => {
+      const { data, sentAt, openedAt } = payload as any;
+      handler({ 
+        data: data || {}, 
+        sentAt: new Date(sentAt), 
+        openedAt: new Date(openedAt) 
+      });
+    },
+  );
+}
+
+/**
+ * Listen for push notification received events
+ */
+export async function onPushNotificationReceived(
+  handler: (payload: Record<string, string>) => void,
+): Promise<any> {
+  return await listen(
+    "fcm://push-received",
+    ({ payload }) => {
+      handler(payload as Record<string, string>);
     },
   );
 }
@@ -52,6 +66,7 @@ export async function getLatestNotificationData(): Promise<{
     openedAt: new Date(result.openedAt),
   };
 }
+
 
 /**
  * Get the FCM token

@@ -50,3 +50,4 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
     })
     .build()
 }
+

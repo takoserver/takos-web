@@ -76,3 +76,4 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         return android.R.drawable.sym_def_app_icon // fallback icon
     }
 }
+

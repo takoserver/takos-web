@@ -21,3 +21,4 @@ impl Serialize for Error {
     serializer.serialize_str(self.to_string().as_ref())
   }
 }
+
