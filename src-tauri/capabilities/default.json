@@ -1,5 +1,5 @@
 {
-  "$schema": "../gen/schemas/desktop-schema.json",
+  "$schema": "../gen/schemas/mobile-schema.json",
   "identifier": "default",
   "description": "enables the default permissions",
   "windows": [
@@ -17,6 +17,7 @@
     },
     "store:default",
     "notification:default",
-    "fcm:default"
+    "fcm:default",
+    "core:event:default"
   ]
 }

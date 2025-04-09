@@ -22,9 +22,14 @@ class SubscribeToTopicArgs {
 
 @TauriPlugin
 class FCMPlugin(private val activity: Activity) : Plugin(activity) {
+    companion object {
+        var instance: FCMPlugin? = null
+    }
+
     private var latestData = JSObject()
 
     override fun load(webView: WebView) {
+        instance = this
         val options = FirebaseOptions.Builder().setApiKey("AIzaSyBiAPQOtI-Rlm81k9XTCMN3eSz7SoznoHw")
             .setProjectId("takoserver-b407a")
             .setApplicationId("1:904208614929:android:4cb4b89fbdb18e8e1a93b0").build()
@@ -57,6 +62,14 @@ class FCMPlugin(private val activity: Activity) : Plugin(activity) {
             }
         }
     }
+
+    fun onPushReceived(data: Map<String, String>) {
+        val payload = JSObject()
+        data.forEach { (k, v) -> payload.put(k, v) }
+        println("呼び出されてるかチェック2")
+        trigger("pushNotificationReceived", payload)
+    }
+    
 
     @Command
     fun getLatestNotificationData(invoke: Invoke) {

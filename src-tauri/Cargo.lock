@@ -4511,6 +4511,7 @@ name = "tauri-plugin-fcm"
 version = "0.0.0"
 dependencies = [
  "serde",
+ "serde_json",
  "tauri",
  "tauri-plugin",
  "thiserror 1.0.69",

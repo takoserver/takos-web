@@ -13,13 +13,11 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
 import com.plugin.fcm.NotificationHandler
+import com.plugin.fcm.FCMPlugin
 import kotlin.random.Random
 
-/**
- * アプリのFirebaseメッセージング処理を担当するサービスクラス
- */
+
 class MyFirebaseMessagingService : FirebaseMessagingService() {
-    
     @SuppressLint("LaunchActivityFromNotification")
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         val gson = Gson()
@@ -28,6 +26,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             putExtra("data", dataPayload)
             putExtra("sent_at", remoteMessage.sentTime)
         }
+        println("呼び出されてるかチェック")
+        FCMPlugin.instance?.onPushReceived(remoteMessage.data)
 
         val requestCode = Random.nextInt()
         val pendingIntent = PendingIntent.getBroadcast(

@@ -15,7 +15,6 @@ class NotificationHandler : BroadcastReceiver() {
         newIntent.putExtra("data", intent.getStringExtra("data"))
         newIntent.putExtra("sent_at", intent.getLongExtra("sent_at", 0))
         newIntent.putExtra("opened_at", System.currentTimeMillis())
-
         context.startActivity(newIntent)
     }
 }

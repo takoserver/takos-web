@@ -3,7 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 android {
-    namespace = "com.plugin.fcm"
+    namespace = "jp.takos.app"
     compileSdk = 34
 
     defaultConfig {

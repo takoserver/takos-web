@@ -4,7 +4,8 @@ import { Router } from "@solidjs/router";
 import "./styles/loading.css";
 import { subscribeToTopic, getFCMToken, onPushNotificationOpened, getLatestNotificationData } from '../src-tauri/tauri-plugin-fcm/guest-js/index.ts';
 import { requestPermission, isPermissionGranted, sendNotification } from '@tauri-apps/plugin-notification'
-
+import { emit, listen } from "@tauri-apps/api/event";
+import { addPluginListener, PluginListener } from '@tauri-apps/api/core';
 const root = document.getElementById("root");
 
 import { createSignal, onMount } from "solid-js";
@@ -19,13 +20,17 @@ function Test() {
   }
 
   onMount(() => {
-    onPushNotificationOpened((notification) => {
-      console.log("Notification opened:", notification);
-      sendNotification({
-        title: "Notification Clicked",
-        body: `${notification.data}`,
-      });
-    })
+    listen("pushNotificationReceived", (event) => {
+      console.log("Push notification opened:", event.payload);
+      alert("Push notification opened: ");
+    });
+    console.log("Listening to pushNotificationReceived event");
+
+    addPluginListener("tauri-plugin-fcm", "pushNotificationReceived", (event) => {
+      console.log("Push notification received:");
+      alert("Push notification received: ");
+    });
+
   })
 
   function copyToClipboard() {
