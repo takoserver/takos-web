@@ -5,8 +5,9 @@ import "./styles/loading.css";
 import { subscribeToTopic, getFCMToken, onPushNotificationOpened, getLatestNotificationData, onPushNotificationReceived } from '../src-tauri/tauri-plugin-fcm/guest-js/index.ts';
 import { requestPermission, isPermissionGranted, sendNotification } from '@tauri-apps/plugin-notification'
 import { createSignal, onMount } from "solid-js";
-
 const root = document.getElementById("root");
+
+
 
 function Test() {
   const [token, setToken] = createSignal<string | null>(null);
@@ -17,17 +18,8 @@ function Test() {
     setToken(tokenResponse);
   }
 
-  onMount(() => {
-    // Tauriのイベントシステムを使用して通知イベントをリスン
-    onPushNotificationReceived((data) => {
-      console.log("Push notification received:", data);
-      alert("Push notification received: " + JSON.stringify(data));
-    });
+  onMount(async () => {
 
-    onPushNotificationOpened(({ data, sentAt, openedAt }) => {
-      console.log("Push notification opened:", { data, sentAt, openedAt });
-      alert("Push notification opened: " + JSON.stringify(data));
-    });
   })
 
   function copyToClipboard() {
@@ -104,7 +96,7 @@ function Test() {
 const routes = [
   {
     path: "/",
-    component: () => <Test />,
+    component: () => <App />,
   },
   {
     path: "/login",

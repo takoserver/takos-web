@@ -46,13 +46,18 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
         }),
       },
     )?;
-    
+
+
     // プッシュ通知を受信したイベントのハンドラーを設定
     let app_handle = app.clone();
     handle.run_mobile_plugin::<()>(
       "setPushReceivedHandler",
       EventHandler {
         handler: Channel::new(move |event| {
+
+          
+          // デバッグ用にrust側でnotificationを送信したい
+
           match event {
             InvokeResponseBody::Json(json_string) => {
               if let Ok(payload) = serde_json::from_str::<Value>(&json_string) {

@@ -19,7 +19,7 @@ export async function onPushNotificationOpened(
     "fcm://notification-opened",
     ({ payload }) => {
       const { data, sentAt, openedAt } = payload as any;
-      handler({ 
+      handler({
         data: data || {}, 
         sentAt: new Date(sentAt), 
         openedAt: new Date(openedAt) 

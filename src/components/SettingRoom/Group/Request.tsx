@@ -144,7 +144,7 @@ export function GroupSettingRequest() {
 
                                 try {
                                   const res = await TakosFetch(
-                                    "./api/v2/group/join/accept",
+                                    "/api/v2/group/join/accept",
                                     {
                                       method: "POST",
                                       headers: {

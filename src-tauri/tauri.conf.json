@@ -29,5 +29,11 @@
     "icon": [
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "sql": {
+      "default": "sqlite",
+      "drivers": ["sqlite"]
+    }
   }
 }

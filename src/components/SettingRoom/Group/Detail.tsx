@@ -241,7 +241,7 @@ export function GroupSettingDetail() {
 
                     // 更新データを送信
                     const res = await TakosFetch(
-                      "./api/v2/group/settings",
+                      "/api/v2/group/settings",
                       {
                         method: "POST",
                         headers: {

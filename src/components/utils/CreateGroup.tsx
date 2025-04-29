@@ -236,7 +236,7 @@ export function GroupFindPopUp() {
                                 onClick={async () => {
                                   if (group.allowJoin) {
                                     const res = await TakosFetch(
-                                      `./api/v2/group/join`,
+                                      `/api/v2/group/join`,
                                       {
                                         method: "POST",
                                         headers: {
@@ -254,7 +254,7 @@ export function GroupFindPopUp() {
                                     alert("グループに参加しました");
                                   } else {
                                     const res = await TakosFetch(
-                                      `./api/v2/group/join/request`,
+                                      `/api/v2/group/join/request`,
                                       {
                                         method: "POST",
                                         headers: {

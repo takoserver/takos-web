@@ -20,8 +20,8 @@ export function FriendDetail() {
     try {
       const host = friendId.split("@")[1];
       const [iconResponse, nickNameResponse] = await Promise.all([
-        TakosFetch(`https://${host}/_takos/v1/user/icon/${friendId}`),
-        TakosFetch(`https://${host}/_takos/v1/user/nickName/${friendId}`),
+        TakosFetch(`https://${host}/_takos/v1/user/${friendId}/icon`),
+        TakosFetch(`https://${host}/_takos/v1/user/${friendId}/nickName`),
       ]);
 
       const iconData = await iconResponse.json();

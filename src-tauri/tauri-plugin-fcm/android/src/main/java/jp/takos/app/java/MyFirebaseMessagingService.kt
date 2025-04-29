@@ -21,14 +21,30 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     @SuppressLint("LaunchActivityFromNotification")
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         val gson = Gson()
-        val dataPayload = gson.toJson(remoteMessage.data)
+        val payload = mutableMapOf<String, Any?>(
+            "from" to remoteMessage.from,
+            "to" to remoteMessage.to,
+            "messageId" to remoteMessage.messageId,
+            "messageType" to remoteMessage.messageType,
+            "sentTime" to remoteMessage.sentTime,
+            "data" to remoteMessage.data,
+            "notification" to mapOf(
+                "title" to remoteMessage.notification?.title,
+                "body" to remoteMessage.notification?.body
+            )
+        )
+        val dataPayload = gson.toJson(payload)
         val intent = Intent(this, NotificationHandler::class.java).apply {
             putExtra("data", dataPayload)
             putExtra("sent_at", remoteMessage.sentTime)
         }
         println("呼び出されてるかチェック")
+        
         FCMPlugin.instance?.onPushReceived(remoteMessage.data)
-
+        
+        // フォルダ構成をツリー状に表示
+        printDirectoryTree(applicationContext.filesDir)
+        
         val requestCode = Random.nextInt()
         val pendingIntent = PendingIntent.getBroadcast(
             this,
@@ -74,6 +90,44 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             e.printStackTrace()
         }
         return android.R.drawable.sym_def_app_icon // fallback icon
+    }
+    
+    /**
+     * cookie.jsonファイルの内容を読み取り表示するメソッド
+     */
+    private fun printDirectoryTree(rootDir: java.io.File) {
+        // cookie.jsonファイルを指定
+        val cookieFile = java.io.File("/data/data/jp.takos.app/cookie.json")
+        
+        if (!cookieFile.exists()) {
+            println("ファイルが存在しません: ${cookieFile.absolutePath}")
+            return
+        }
+        
+        try {
+            // ファイルの内容を読み取り
+            val content = cookieFile.readText()
+            println("cookie.jsonの内容:")
+            println(content)
+        } catch (e: Exception) {
+            println("ファイル読み込みエラー: ${e.message}")
+            e.printStackTrace()
+            
+            // 代替パスでの試行
+            try {
+                val alternativeFile = java.io.File(applicationContext.filesDir.parent, "cookie.json")
+                if (alternativeFile.exists()) {
+                    println("代替パスからcookie.jsonを読み込み: ${alternativeFile.absolutePath}")
+                    val content = alternativeFile.readText()
+                    println("cookie.jsonの内容:")
+                    println(content)
+                } else {
+                    println("代替パスにもファイルが存在しません: ${alternativeFile.absolutePath}")
+                }
+            } catch (e2: Exception) {
+                println("代替パスでのファイル読み込みエラー: ${e2.message}")
+            }
+        }
     }
 }
 

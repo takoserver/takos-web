@@ -150,8 +150,9 @@ export function Load() {
     }
     console.log("session");
     if (session.login) {
+      console.log("uaaaaaaaaaaaaaaaaaaaaaaa", userId)
       setLogin(true);
-      TakosFetch("/_takos/v1/user/nickName/" + userId, {
+      TakosFetch("/_takos/v1/user/" + userId + "/nickName", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -162,7 +163,7 @@ export function Load() {
             setNickName(data.nickName);
           }
         });
-      TakosFetch("/_takos/v1/user/description/" + userId).then((res) =>
+      TakosFetch("/_takos/v1/user/" + userId + "/description").then((res) =>
         res.json()
       )
         .then((data) => {
@@ -170,7 +171,7 @@ export function Load() {
             setDiscription(data.description);
           }
         });
-      TakosFetch("/_takos/v1/user/icon/" + userId).then((res) => res.json())
+      TakosFetch(`/_takos/v1/user/${userId}/icon`).then((res) => res.json())
         .then(
           (data) => {
             setIcon(data.icon);
@@ -185,7 +186,7 @@ export function Load() {
     }
     if (session.setup) {
       const icon = await TakosFetch(
-        "/_takos/v1/user/icon/" + userId,
+        `/_takos/v1/user/${userId}/icon`,
         {
           method: "GET",
           headers: {

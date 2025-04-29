@@ -38,7 +38,7 @@ export function Register() {
                 setCheckCode("");
                 setUserName("");
                 const response = await TakosFetch(
-                  "./api/v2/sessions/register/temp",
+                  "/api/v2/sessions/register/temp",
                   {
                     method: "POST",
                     headers: {
@@ -80,7 +80,7 @@ export function Register() {
                 e.preventDefault();
                 const code = checkCode();
                 const response = await TakosFetch(
-                  "./api/v2/sessions/register/check",
+                  "/api/v2/sessions/register/check",
                   {
                     method: "POST",
                     headers: {
@@ -122,7 +122,7 @@ export function Register() {
               onSubmit={async (e) => {
                 e.preventDefault();
                 const response = await TakosFetch(
-                  "./api/v2/sessions/register",
+                  "/api/v2/sessions/register",
                   {
                     method: "POST",
                     headers: {

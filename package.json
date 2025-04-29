@@ -17,8 +17,10 @@
     "@solidjs/router": "^0.14.7",
     "@takos/takos-encrypt-ink": "npm:@jsr/takos__takos-encrypt-ink@^6.0.2",
     "@tauri-apps/api": "^2.0.0",
+    "@tauri-apps/plugin-fs": "^2.2.1",
     "@tauri-apps/plugin-http": "^2.4.0",
     "@tauri-apps/plugin-notification": "^2.2.2",
+    "@tauri-apps/plugin-sql": "^2.2.0",
     "@tauri-apps/plugin-store": "^2.2.0",
     "@tauri-apps/plugin-websocket": "^2.3.0",
     "base64-arraybuffer": "^1.0.2",
@@ -33,12 +35,12 @@
     "solid-jotai": "^0.3.1",
     "solid-js": "^1.9.5",
     "solid-transition-group": "^0.3.0",
+    "tauri-plugin-fcm-api": "file:src-tauri/tauri-plugin-fcm",
     "tui-code-snippet": "^2.3.3",
     "tui-color-picker": "^2.2.8",
     "ua-parser-js": "^2.0.2",
     "ui7": "^0.2.3",
-    "uuidv7": "^1.0.2",
-    "tauri-plugin-fcm-api": "file:src-tauri/tauri-plugin-fcm"
+    "uuidv7": "^1.0.2"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.4.1",

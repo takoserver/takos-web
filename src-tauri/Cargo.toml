@@ -30,3 +30,9 @@ tauri-plugin-notification = "2"
 cpal = "0.15.2"
 
 tauri-plugin-fcm = { path = "tauri-plugin-fcm" }
+tauri-plugin-fs = "2"
+
+[dependencies.tauri-plugin-sql]
+git = "https://github.com/tauri-apps/plugins-workspace"
+branch = "v2"
+features = ["sqlite"] # or "postgres", or "mysql"

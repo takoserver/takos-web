@@ -57,14 +57,12 @@ class FCMPlugin(private val activity: Activity) : Plugin(activity) {
         newIntent.extras?.let {
             val data = it.getString("data")
             val sentAt = it.getLong("sent_at")
-            val openedAt = it.getLong("opened_at")
+            val openedAt = it.getLong("opened_at", System.currentTimeMillis())
             if (data != null) {
-                val result = JSObject().apply {
-                    put("data", JSObject(data))
+                val result = JSObject(data).apply {
                     put("sentAt", sentAt)
                     put("openedAt", openedAt)
                 }
-
                 this.latestData = result
                 notificationChannel?.send(result)
             }

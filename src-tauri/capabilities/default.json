@@ -18,6 +18,7 @@
     "store:default",
     "notification:default",
     "fcm:default",
-    "core:event:default"
+    "core:event:default",
+    "sql:default"
   ]
 }

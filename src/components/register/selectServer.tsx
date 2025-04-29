@@ -3,7 +3,7 @@ import { fetch } from "@tauri-apps/plugin-http";
 import { Store } from "@tauri-apps/plugin-store";
 
 // Storeを正しく使用するための関数を用意
-let storePromise = null;
+let storePromise: Promise<Store> | null = null;
 
 async function getStore() {
   if (!storePromise) {

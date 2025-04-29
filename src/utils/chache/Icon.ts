@@ -27,8 +27,8 @@ export async function TakosFetchEntityInfo(
   const TakosFetchPromise = (async () => {
     try {
       const endpoints = type === "friend"
-        ? [`user/icon/${id}`, `user/nickName/${id}`]
-        : [`group/icon/${id}`, `group/name/${id}`];
+        ? [`user/${id}/icon`, `user/${id}/nickName`]
+        : [`group/${id}/icon`, `group/${id}/name`];
 
       // 並行して両方の情報を取得
       console.log(`https://${domain}/_takos/v1/${endpoints[0]}`);
